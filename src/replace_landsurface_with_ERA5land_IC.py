@@ -8,8 +8,9 @@ from pathlib import Path
 import xarray as xr, sys, argparse
 from datetime import datetime,timedelta
 
+ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
-ERA_DIR = '/g/data/zz93/era5-land/reanalysis/'
+ERA_DIR = os.path.join(ROSE_DATA, 'etc', 'era5_land')
 
 # The depths of soil for the conversion
 ##########multipliers=[7.*10., 21.*10., 72.*10., 189.*10.]
@@ -220,9 +221,9 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
 
     # Find one "swvl1" file in the archive and create a generic filename
     ERA_FIELDN = 'swvl1'
-    land_yes = ERA_DIR + ERA_FIELDN + '/' + yyyy + '/'
-    era_files = glob(land_yes + '/' + ERA_FIELDN + '*' + yyyy + mm + '*nc')
-    era5_fname = land_yes + '/' + era_files[0].split('/')[-1]
+    land_yes = os.path.join(ERA_DIR, ERA_FIELDN, yyyy)
+    era_files = glob(os.path.join(land_yes, ERA_FIELDN + '*' + yyyy + mm + '*nc'))
+    era5_fname = os.path.join(land_yes, os.path.basename(era_files[0]))
     generic_era5_fname = era5_fname.replace('swvl1', 'FIELDN')
 
     # Path to input file 
