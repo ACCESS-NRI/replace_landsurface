@@ -15,8 +15,9 @@ from pathlib import Path
 import xarray as xr, sys, argparse
 from datetime import datetime,timedelta
 
+ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
-BARRA_DIR = '/g/data/ob53/BARRA2/output/reanalysis/AUS-11/BOM/ERA5/historical/hres/BARRA-R2/v1/'
+BARRA_DIR = os.path.join(ROSE_DATA, 'etc', 'barra_r2')
 
 
 class ReplaceOperator(mule.DataOperator):
@@ -198,9 +199,9 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Read in the surface temperature data from the archive
     BARRA_FIELDN = 'ts'
-    indir = BARRA_DIR + '1hr/' + BARRA_FIELDN + '/v20231001'
-    barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
-    barra_fname = indir + '/' + barra_files[0].split('/')[-1]
+    indir = os.path.join(BARRA_DIR, '1hr', BARRA_FIELDN, 'v20231001')
+    barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
+    barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
 
     # Work out the grid bounds using the surface temperature file
     bounds = bounding_box(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
@@ -211,17 +212,17 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     
     # Read in the soil moisture data (and keep to use for replacement)
     BARRA_FIELDN = 'mrsol'
-    indir = BARRA_DIR + '/3hr/' + BARRA_FIELDN + '/v20231001'
-    barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
-    barra_fname = indir + '/' + barra_files[0].split('/')[-1]
+    indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, 'v20231001')
+    barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
+    barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
     mrsol = data.copy()
 
     # Read in the soil temperature data (and keep to use for replacement)
     BARRA_FIELDN = 'tsl'
-    indir = BARRA_DIR + '3hr/' + BARRA_FIELDN + '/v20231001'
-    barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
-    barra_fname = indir + '/' + barra_files[0].split('/')[-1]
+    indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, 'v20231001')
+    barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
+    barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
     tsl = data.copy()
     
