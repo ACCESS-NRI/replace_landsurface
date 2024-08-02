@@ -113,7 +113,7 @@ class BoundingBox:
 		self.latmax = latmax_index
 
 
-def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
+def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds):
 	"""
 	Function to get the ERA5-land data for a single land/surface variable.
 
@@ -121,7 +121,7 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
 	----------
 	ncfname : string
 		The name of the file to read
-	FIELDN : string
+	fieldn : string
 		The name of the variable in the file to read
 	wanted_dt : string
 		The date-time required in "%Y%m%d%H%M" format
@@ -139,7 +139,7 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
 	latmin_index, latmax_index = bounds.latmin, bounds.latmax
 
 	# Open the file containing the data
-	print(ncfname, FIELDN)
+	print(ncfname, fieldn)
 	if Path(ncfname).exists():
 		d = xr.open_dataset(ncfname)
 	else:
@@ -148,15 +148,15 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
 
 	# Find the array index for the date/time of interest
 	times = d["time"].dt.strftime("%Y%m%d%H%M").data
-	TM = times.tolist().index(wanted_dt)
-	print(TM)
+	tm = times.tolist().index(wanted_dt)
+	print(tm)
 
 	# Read the data
 	if lonmin_index < lonmax_index:
 		# Grid does not wrap around.  Simple read.
 
 		try:
-			data = d[FIELDN][TM, latmin_index : latmax_index + 1, lonmin_index : lonmax_index + 1]
+			data = d[fieldn][tm, latmin_index : latmax_index + 1, lonmin_index : lonmax_index + 1]
 			data = data.data
 
 		except KeyError:
@@ -167,8 +167,8 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
 		# Data required wraps around the input grid.  Read in sections and patch together.
 
 		try:
-			data_left = d[FIELDN][TM, latmin_index : latmax_index + 1, lonmin_index:].data
-			data_right = d[FIELDN][TM, latmin_index : latmax_index + 1, 0 : lonmax_index + 1].data
+			data_left = d[fieldn][tm, latmin_index : latmax_index + 1, lonmin_index:].data
+			data_right = d[fieldn][tm, latmin_index : latmax_index + 1, 0 : lonmax_index + 1].data
 			data = np.concatenate((data_left, data_right), axis=1)
 
 		except KeyError:
@@ -182,10 +182,10 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
 	return data[::-1, :]
 
 
-def replace_in_ff(f, generic_era5_fname, ERA_FIELDN, multiplier, ic_z_date, mf_out, replace, bounds):
+def replace_in_ff(f, generic_era5_fname, era_fieldn, multiplier, ic_z_date, mf_out, replace, bounds):
 	current_data = f.get_data()
-	era5_fname = generic_era5_fname.replace("FIELDN", ERA_FIELDN)
-	data = get_era_nc_data(era5_fname, ERA_FIELDN, ic_z_date, bounds)
+	era5_fname = generic_era5_fname.replace("FIELDN", era_fieldn)
+	data = get_era_nc_data(era5_fname, era_fieldn, ic_z_date, bounds)
 	if multiplier < 0:
 		pass
 	else:
@@ -223,9 +223,9 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
 	ic_z_date = ic_date.replace("T", "").replace("Z", "")
 
 	# Find one "swvl1" file in the archive and create a generic filename
-	ERA_FIELDN = "swvl1"
-	land_yes = os.path.join(ERA_DIR, ERA_FIELDN, yyyy)
-	era_files = glob(os.path.join(land_yes, ERA_FIELDN + "*" + yyyy + mm + "*nc"))
+	era_fieldn = "swvl1"
+	land_yes = os.path.join(ERA_DIR, era_fieldn, yyyy)
+	era_files = glob(os.path.join(land_yes, era_fieldn + "*" + yyyy + mm + "*nc"))
 	era5_fname = os.path.join(land_yes, os.path.basename(era_files[0]))
 	generic_era5_fname = era5_fname.replace("swvl1", "FIELDN")
 

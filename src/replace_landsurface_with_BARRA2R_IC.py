@@ -97,7 +97,7 @@ class BoundingBox:
 		self.latmax = latmax_index
 
 
-def get_barra_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
+def get_barra_nc_data(ncfname, fieldn, wanted_dt, nlayers, bounds):
 	"""
 	Function to get the BARA2-R data for a single land/surface variable.
 
@@ -105,11 +105,11 @@ def get_barra_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
 	----------
 	ncfname : string
 		The name of the file to read
-	FIELDN : string
+	fieldn : string
 		The name of the variable in the file to read
 	wanted_dt : string
 		The date-time required in "%Y%m%d%H%M" format
-	NLAYERS : int
+	nlayers : int
 		The number of layers in the multi-resolution grid (1 or more)
 	bounds : bounding_box object
 		A bounding box object defining the spatial extent to keep
@@ -129,7 +129,7 @@ def get_barra_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
 
 	# Find the array index for the date/time of interest
 	times = d["time"].dt.strftime("%Y%m%d%H%M").data
-	TM = times.tolist().index(wanted_dt)
+	tm = times.tolist().index(wanted_dt)
 
 	# retrieve the spatial extends of interest
 	lonmin_index, lonmax_index = bounds.lonmin, bounds.lonmax
@@ -137,10 +137,10 @@ def get_barra_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
 
 	# Read the data
 	try:
-		if NLAYERS > 1:
-			data = d[FIELDN][TM, :, latmin_index : latmax_index + 1, lonmin_index : lonmax_index + 1]
+		if nlayers > 1:
+			data = d[fieldn][tm, :, latmin_index : latmax_index + 1, lonmin_index : lonmax_index + 1]
 		else:
-			data = d[FIELDN][TM, latmin_index : latmax_index + 1, lonmin_index : lonmax_index + 1]
+			data = d[fieldn][tm, latmin_index : latmax_index + 1, lonmin_index : lonmax_index + 1]
 	except KeyError:
 		print(fname)
 		print("ERROR: Variable temp not found in file", file=sys.stderr)
@@ -192,32 +192,32 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 	replace = ReplaceOperator()
 
 	# Read in the surface temperature data from the archive
-	BARRA_FIELDN = "ts"
-	indir = os.path.join(BARRA_DIR, "1hr", BARRA_FIELDN, "v20231001")
-	barra_files = glob(os.path.join(indir, BARRA_FIELDN + "*" + yyyy + mm + "*nc"))
+	barra_fieldn = "ts"
+	indir = os.path.join(BARRA_DIR, "1hr", barra_fieldn, "v20231001")
+	barra_files = glob(os.path.join(indir, barra_fieldn + "*" + yyyy + mm + "*nc"))
 	barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
 
 	# Work out the grid bounds using the surface temperature file
 	bounds = BoundingBox(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
 
 	# Read in the surface temperature data (and keep to use for replacement)
-	data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_z_date, -1, bounds)
+	data = get_barra_nc_data(barra_fname, barra_fieldn, ic_z_date, -1, bounds)
 	surface_temp = data.copy()
 
 	# Read in the soil moisture data (and keep to use for replacement)
-	BARRA_FIELDN = "mrsol"
-	indir = os.path.join(BARRA_DIR, "3hr", BARRA_FIELDN, "v20231001")
-	barra_files = glob(os.path.join(indir, BARRA_FIELDN + "*" + yyyy + mm + "*nc"))
+	barra_fieldn = "mrsol"
+	indir = os.path.join(BARRA_DIR, "3hr", barra_fieldn, "v20231001")
+	barra_files = glob(os.path.join(indir, barra_fieldn + "*" + yyyy + mm + "*nc"))
 	barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-	data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
+	data = get_barra_nc_data(barra_fname, barra_fieldn, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
 	mrsol = data.copy()
 
 	# Read in the soil temperature data (and keep to use for replacement)
-	BARRA_FIELDN = "tsl"
-	indir = os.path.join(BARRA_DIR, "3hr", BARRA_FIELDN, "v20231001")
-	barra_files = glob(os.path.join(indir, BARRA_FIELDN + "*" + yyyy + mm + "*nc"))
+	barra_fieldn = "tsl"
+	indir = os.path.join(BARRA_DIR, "3hr", barra_fieldn, "v20231001")
+	barra_files = glob(os.path.join(indir, barra_fieldn + "*" + yyyy + mm + "*nc"))
 	barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-	data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
+	data = get_barra_nc_data(barra_fname, barra_fieldn, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
 	tsl = data.copy()
 
 	# Set up the output file
