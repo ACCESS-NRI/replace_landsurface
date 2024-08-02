@@ -97,7 +97,7 @@ class BoundingBox:
 		self.latmax = latmax_index
 
 
-def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
+def get_barra_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
 	"""
 	Function to get the BARA2-R data for a single land/surface variable.
 
@@ -201,7 +201,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 	bounds = BoundingBox(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
 
 	# Read in the surface temperature data (and keep to use for replacement)
-	data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_z_date, -1, bounds)
+	data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_z_date, -1, bounds)
 	surface_temp = data.copy()
 
 	# Read in the soil moisture data (and keep to use for replacement)
@@ -209,7 +209,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 	indir = os.path.join(BARRA_DIR, "3hr", BARRA_FIELDN, "v20231001")
 	barra_files = glob(os.path.join(indir, BARRA_FIELDN + "*" + yyyy + mm + "*nc"))
 	barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-	data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
+	data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
 	mrsol = data.copy()
 
 	# Read in the soil temperature data (and keep to use for replacement)
@@ -217,7 +217,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 	indir = os.path.join(BARRA_DIR, "3hr", BARRA_FIELDN, "v20231001")
 	barra_files = glob(os.path.join(indir, BARRA_FIELDN + "*" + yyyy + mm + "*nc"))
 	barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-	data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
+	data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace("T", "").replace("Z", ""), 4, bounds)
 	tsl = data.copy()
 
 	# Set up the output file

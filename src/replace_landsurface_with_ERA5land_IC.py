@@ -113,7 +113,7 @@ class BoundingBox:
 		self.latmax = latmax_index
 
 
-def get_ERA_nc_data(ncfname, FIELDN, wanted_dt, bounds):
+def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
 	"""
 	Function to get the ERA5-land data for a single land/surface variable.
 
@@ -185,7 +185,7 @@ def get_ERA_nc_data(ncfname, FIELDN, wanted_dt, bounds):
 def replace_in_ff(f, generic_era5_fname, ERA_FIELDN, multiplier, ic_z_date, mf_out, replace, bounds):
 	current_data = f.get_data()
 	era5_fname = generic_era5_fname.replace("FIELDN", ERA_FIELDN)
-	data = get_ERA_nc_data(era5_fname, ERA_FIELDN, ic_z_date, bounds)
+	data = get_era_nc_data(era5_fname, ERA_FIELDN, ic_z_date, bounds)
 	if multiplier < 0:
 		pass
 	else:
