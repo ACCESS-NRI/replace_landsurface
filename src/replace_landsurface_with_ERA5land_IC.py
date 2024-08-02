@@ -11,6 +11,10 @@ import xarray as xr
 ROSE_DATA = os.environ.get("ROSE_DATA")
 # Base directory of the ERA5-land archive on NCI
 ERA_DIR = os.path.join(ROSE_DATA, "etc", "era5_land")
+# Item codes
+SOIL_MOISTURE_ITEM_CODE = 9
+SOIL_TEMPERATURE_ITEM_CODE = 20
+SURFACE_TEMPERATURE_ITEM_CODE = 24
 
 # The depths of soil for the conversion
 ##########multipliers=[7.*10., 21.*10., 72.*10., 189.*10.]
@@ -64,7 +68,7 @@ class BoundingBox:
 			lonmin = np.min(lons)
 			lonmax = np.max(lons)
 
-			if lonmax > 180.0:
+			if lonmax > 180.0:  # noqa: PLR2004
 				lonmax = lonmax - 360.0
 
 			lats = d["latitude"].data
@@ -249,7 +253,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
 	for f in mf_in.fields:
 		print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
 
-		if f.lbuser4 == 9:
+		if f.lbuser4 == SOIL_MOISTURE_ITEM_CODE:
 			# replace coarse soil moisture with high-res information
 			if f.lblev == 4:
 				replace_in_ff(f, generic_era5_fname, "swvl4", multipliers[3], ic_z_date, mf_out, replace, bounds)
@@ -260,7 +264,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
 			elif f.lblev == 1:
 				replace_in_ff(f, generic_era5_fname, "swvl1", multipliers[0], ic_z_date, mf_out, replace, bounds)
 
-		elif f.lbuser4 == 20:
+		elif f.lbuser4 == SOIL_TEMPERATURE_ITEM_CODE:
 			# soil temperature
 			if f.lblev == 4:
 				replace_in_ff(f, generic_era5_fname, "stl4", -1, ic_z_date, mf_out, replace, bounds)
@@ -271,7 +275,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
 			elif f.lblev == 1:
 				replace_in_ff(f, generic_era5_fname, "stl1", -1, ic_z_date, mf_out, replace, bounds)
 
-		elif f.lbuser4 == 24:
+		elif f.lbuser4 == SURFACE_TEMPERATURE_ITEM_CODE:
 			replace_in_ff(f, generic_era5_fname, "skt", -1, ic_z_date, mf_out, replace, bounds)
 		else:
 			mf_out.fields.append(f)

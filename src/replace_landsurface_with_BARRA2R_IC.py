@@ -11,6 +11,10 @@ import xarray as xr
 ROSE_DATA = os.environ.get("ROSE_DATA")
 # Base directory of the ERA5-land archive on NCI
 BARRA_DIR = os.path.join(ROSE_DATA, "etc", "barra_r2")
+# Item codes
+SOIL_MOISTURE_ITEM_CODE = 9
+SOIL_TEMPERATURE_ITEM_CODE = 20
+SURFACE_TEMPERATURE_ITEM_CODE = 24
 
 
 class ReplaceOperator(mule.DataOperator):
@@ -223,19 +227,19 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 	# For each field in the input write to the output file (but modify as required)
 	for f in mf_in.fields:
 		print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
-		if f.lbuser4 == 9:
+		if f.lbuser4 == SOIL_MOISTURE_ITEM_CODE:
 			# replace coarse soil moisture with high-res information
 			current_data = f.get_data()
 			data = mrsol[f.lblev - 1, :, :]
 			data = np.where(np.isnan(data), current_data, data)
 			mf_out.fields.append(replace([f, data]))
-		elif f.lbuser4 == 20:
+		elif f.lbuser4 == SOIL_TEMPERATURE_ITEM_CODE:
 			# replace coarse soil temperature with high-res information
 			current_data = f.get_data()
 			data = tsl[f.lblev - 1, :, :]
 			data = np.where(np.isnan(data), current_data, data)
 			mf_out.fields.append(replace([f, data]))
-		elif f.lbuser4 == 24:
+		elif f.lbuser4 == SURFACE_TEMPERATURE_ITEM_CODE:
 			# replace surface temperature with high-res information
 			current_data = f.get_data()
 			data = surface_temp
