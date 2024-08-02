@@ -142,7 +142,7 @@ def get_barra_nc_data(ncfname, fieldn, wanted_dt, nlayers, bounds):
 		else:
 			data = d[fieldn][tm, latmin_index : latmax_index + 1, lonmin_index : lonmax_index + 1]
 	except KeyError:
-		print(fname)
+		print(ncfname)
 		print("ERROR: Variable temp not found in file", file=sys.stderr)
 		sys.exit(1)
 

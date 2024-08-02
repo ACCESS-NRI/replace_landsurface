@@ -160,7 +160,7 @@ def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds):
 			data = data.data
 
 		except KeyError:
-			print(fname)
+			print(ncfname)
 			print("ERROR: Variable temp not found in file", file=sys.stderr)
 			sys.exit(1)
 	else:
@@ -172,7 +172,7 @@ def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds):
 			data = np.concatenate((data_left, data_right), axis=1)
 
 		except KeyError:
-			print(fname)
+			print(ncfname)
 			print("ERROR: Variable temp not found in file", file=sys.stderr)
 			sys.exit(1)
 
