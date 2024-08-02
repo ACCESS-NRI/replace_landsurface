@@ -2,5 +2,9 @@ line-length = 120
 indent-width = 4
 
 [format]
-quote-style = "single"  
-indent-style = "tab"
+quote-style = 'double'
+indent-style = 'tab'
+
+[lint]
+select = ['F', 'E', 'W', 'I', 'N', 'UP', 'PL', 'RUF']
+ignore = ['W1']
