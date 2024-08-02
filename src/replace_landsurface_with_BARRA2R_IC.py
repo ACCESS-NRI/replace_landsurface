@@ -170,9 +170,6 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 		The file is replaced with a version of itself holding the higher-resolution data.
 	"""
 
-	# create name of file to be replaced
-	ec_cb_file = ec_cb_file_fullpath.parts[-1].replace(".tmp", "")
-
 	# create date/time useful information
 	yyyy = ic_date[0:4]
 	mm = ic_date[4:6]
