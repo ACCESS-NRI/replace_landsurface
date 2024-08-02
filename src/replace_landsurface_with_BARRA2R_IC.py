@@ -38,11 +38,11 @@ class BoundingBox:
 		Parameters
 		----------
 		ncfname : POSIX string
-		    POSIX path to input data (from the NetCDF archive)
+			POSIX path to input data (from the NetCDF archive)
 		maskfname : POSIX string
-		    POSIX path to mask information to define the data to be cut out
+			POSIX path to mask information to define the data to be cut out
 		var : string
-		    The name of the mask variable that defines the spatial extent
+			The name of the mask variable that defines the spatial extent
 
 		Returns
 		-------
@@ -105,20 +105,20 @@ def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
 	Parameters
 	----------
 	ncfname : string
-	    The name of the file to read
+		The name of the file to read
 	FIELDN : string
-	    The name of the variable in the file to read
+		The name of the variable in the file to read
 	wanted_dt : string
-	    The date-time required in "%Y%m%d%H%M" format
+		The date-time required in "%Y%m%d%H%M" format
 	NLAYERS : int
-	    The number of layers in the multi-resolution grid (1 or more)
+		The number of layers in the multi-resolution grid (1 or more)
 	bounds : bounding_box object
-	    A bounding box object defining the spatial extent to keep
+		A bounding box object defining the spatial extent to keep
 
 	Returns
 	-------
 	2d numpy array
-	    A 2-D numpy array containg the field data for the date/time and spatial extent
+		A 2-D numpy array containg the field data for the date/time and spatial extent
 	"""
 
 	# Open the file containing the data
@@ -159,16 +159,16 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 	Parameters
 	----------
 	mask_fullpath : Path
-	    Path to the mask defining the spatial extent
+		Path to the mask defining the spatial extent
 	ic_file_fullpath : string
-	    Path to file with the coarser resolution data to be replaced with ".tmp" appended at end
+		Path to file with the coarser resolution data to be replaced with ".tmp" appended at end
 	ic_date : string
-	    The date-time required in "%Y%m%d%H%M" format
+		The date-time required in "%Y%m%d%H%M" format
 
 	Returns
 	-------
 	None.
-	    The file is replaced with a version of itself holding the higher-resolution data.
+		The file is replaced with a version of itself holding the higher-resolution data.
 	"""
 
 	# create name of file to be replaced
