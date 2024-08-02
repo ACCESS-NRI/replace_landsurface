@@ -63,8 +63,7 @@ class BoundingBox:
 			latmax = np.max(lats)
 			d.close()
 		else:
-			print(f"ERROR: File {maskfname} not found", file=sys.stderr)
-			raise
+			raise FileNotFoundError(f"ERROR: File {maskfname} not found.")
 
 		# Read in the file from the high-res netcdf archive
 		if Path(ncfname).exists():
