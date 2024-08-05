@@ -54,7 +54,7 @@ def main():
         replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     elif "astart" in args.type:
-        replace_landsurface_with_FF_IC.swap_land_barra(args.mask, args.file, args.hres_ic, t)
+        replace_landsurface_with_FF_IC.swap_land_ff(args.mask, args.file, args.hres_ic, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     else:
         print("No need to swap out IC")
