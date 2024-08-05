@@ -1,0 +1,5 @@
+test_data/
+.coverage
+run_*.sh
+__pycache__/
+*.py[cod]
