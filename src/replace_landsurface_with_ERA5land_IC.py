@@ -27,7 +27,7 @@ class ReplaceOperator(mule.DataOperator):
         print('transform')
         return sources[1]
 
-class bounding_box():
+class bounding_box_era5land():
     """ Container class to hold spatial extent information."""
     def __init__(self, ncfname, maskfname, var):
         """
@@ -240,7 +240,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     replace = ReplaceOperator() 
 
     # Define spatial extent of grid required
-    bounds = bounding_box(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
+    bounds = bounding_box_era5land(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
 
     # Set up the output file
     mf_out = mf_in.copy()
