@@ -7,8 +7,8 @@ era5-land or BARRA2-R data (if requested).
 
 from pathlib import Path
 import argparse
-import pandas
 import shutil
+import pandas
 
 import replace_landsurface_with_ERA5land_IC
 import replace_landsurface_with_BARRA2R_IC
