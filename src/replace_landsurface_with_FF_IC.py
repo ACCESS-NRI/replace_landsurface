@@ -61,9 +61,6 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
     # Create Mule Replacement Operator
     replace = common_mule_operator.ReplaceOperator() 
 
-    # Define spatial extent of grid required
-    #bounds = bounding_box(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
-
     # Set up the output file
     mf_out = mf_in.copy()
 
