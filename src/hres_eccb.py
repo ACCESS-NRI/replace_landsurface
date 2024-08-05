@@ -9,8 +9,8 @@ import argparse
 import shutil
 from pathlib import Path
 import pandas
-import replace_landsurface_with_ERA5land_IC
-import replace_landsurface_with_BARRA2R_IC
+import replace_landsurface_with_eraland_ic
+import replace_landsurface_with_barra_ic
 
 boolopt = {
     "True": True,
@@ -46,10 +46,10 @@ def main():
     
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
-        replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.mask, args.file, t)
+        replace_landsurface_with_eraland_ic.swap_land_era5land(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     elif "barra" in args.type:
-        replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
+        replace_landsurface_with_barra_ic.swap_land_barra(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     elif "astart" in args.type:
         print("Replacement job for FF input files is not processed for single-level suite.")
