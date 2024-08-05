@@ -7,6 +7,7 @@ from glob import glob
 from pathlib import Path
 import xarray as xr, sys, argparse
 from datetime import datetime,timedelta
+import common_mule_operator
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
@@ -15,17 +16,6 @@ ERA_DIR = os.path.join(ROSE_DATA, 'etc', 'era5_land')
 # The depths of soil for the conversion
 ##########multipliers=[7.*10., 21.*10., 72.*10., 189.*10.]
 multipliers = [10.*10., 25.*10., 65.*10., 200.*10.]
-
-class ReplaceOperator(mule.DataOperator):
-    """ Mule operator for replacing the data"""
-    def __init__(self):
-        pass
-    def new_field(self, sources):
-        print('new_field')
-        return sources[0]
-    def transform(self, sources, result):
-        print('transform')
-        return sources[1]
 
 class bounding_box_era5land():
     """ Container class to hold spatial extent information."""
@@ -237,7 +227,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     mf_in = mule.load_umfile(ff_in)
    
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_mule_operator.ReplaceOperator()
 
     # Define spatial extent of grid required
     bounds = bounding_box_era5land(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
