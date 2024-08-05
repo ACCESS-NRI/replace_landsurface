@@ -26,7 +26,7 @@ class ReplaceOperator(mule.DataOperator):
         return sources[1]
 
 
-class bounding_box(): 
+class bounding_box_barra(): 
     """ Container class to hold spatial extent information."""
     def __init__(self, ncfname, maskfname, var):
         """
@@ -198,7 +198,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
 
     # Work out the grid bounds using the surface temperature file
-    bounds = bounding_box(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
+    bounds = bounding_box_barra(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
 
     # Read in the surface temperature data (and keep to use for replacement)
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_z_date ,-1 ,bounds)
