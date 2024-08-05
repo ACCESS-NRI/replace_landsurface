@@ -7,24 +7,12 @@ from glob import glob
 from pathlib import Path
 import xarray as xr, sys, argparse
 from datetime import datetime,timedelta
+import common_mule_operator
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
 BARRA_DIR = os.path.join(ROSE_DATA, 'etc', 'barra_r2')
 BARRA_VERSION = "latest"
-
-
-class ReplaceOperator(mule.DataOperator):
-    """ Mule operator for replacing the data"""
-    def __init__(self):
-        pass
-    def new_field(self, sources):
-        print('new_field')
-        return sources[0]
-    def transform(self, sources, result):
-        print('transform')
-        return sources[1]
-
 
 class bounding_box_barra(): 
     """ Container class to hold spatial extent information."""
@@ -189,7 +177,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     mf_in = mule.load_umfile(ff_in)
     
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_mule_operator.ReplaceOperator() 
 
     # Read in the surface temperature data from the archive
     BARRA_FIELDN = 'ts'
