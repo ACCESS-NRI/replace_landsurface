@@ -12,7 +12,6 @@ from pathlib import Path
 
 import replace_landsurface_with_ERA5land_IC
 import replace_landsurface_with_BARRA2R_IC
-import replace_landsurface_with_FF_IC
 
 boolopt = {
     "True": True,
