@@ -70,31 +70,18 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
       print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
 
       if f.lbuser4 == 9:
-        # replace coarse soil moisture with high-res information
-        if f.lblev == 4:
-          replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lblev == 3:
-          replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lblev == 2:
-          replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lblev == 1:
+          # replace coarse soil moisture with high-res information
           replace_in_ff_from_ff(f, sf, mf_out, replace)
 
       elif f.lbuser4 == 20:
-        # soil temperature
-        if f.lblev == 4:
-          replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lblev == 3:
-          replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lblev == 2:
-          replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lblev == 1:
+          # soil temperature
           replace_in_ff_from_ff(f, sf, mf_out, replace)
 
       elif f.lbuser4 == 24:
-        replace_in_ff_from_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
+          
       else:
-        mf_out.fields.append(f)
+          mf_out.fields.append(f)
    
     # Write output file
     mf_out.validate = lambda *args, **kwargs: True
