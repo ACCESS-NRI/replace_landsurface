@@ -189,23 +189,27 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     bounds = bounding_box_barra(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
 
     # Read in the surface temperature data (and keep to use for replacement)
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_z_date ,-1 ,bounds)
+    BARRA_FIELDN = 'ts' #repeating here for readability
+    BARRA_NLAYERS = 1
+    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_z_date , BARRA_NLAYERS,bounds)
     surface_temp = data.copy()
     
     # Read in the soil moisture data (and keep to use for replacement)
     BARRA_FIELDN = 'mrsol'
+    BARRA_NLAYERS = 4
     indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
+    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), BARRA_NLAYERS, bounds)
     mrsol = data.copy()
 
     # Read in the soil temperature data (and keep to use for replacement)
     BARRA_FIELDN = 'tsl'
+    BARRA_NLAYERS = 4
     indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
+    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), BARRA_NLAYERS, bounds)
     tsl = data.copy()
     
     # Set up the output file
