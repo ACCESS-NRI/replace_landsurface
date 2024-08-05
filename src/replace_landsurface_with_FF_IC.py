@@ -6,17 +6,7 @@ import numpy as np
 from pathlib import Path
 import xarray as xr, sys, argparse
 from datetime import datetime,timedelta
-
-class ReplaceOperator(mule.DataOperator):
-    """ Mule operator for replacing the data"""
-    def __init__(self):
-        pass
-    def new_field(self, sources):
-        print('new_field')
-        return sources[0]
-    def transform(self, sources, result):
-        print('transform')
-        return sources[1]
+import common_mule_operator
 
 def replace_in_ff_from_ff(f, sf, mf_out, replace):
 #def replace_in_ff(f, generic_era5_fname, ERA_FIELDN, multiplier, ic_z_date, mf_out, replace, bounds):
@@ -69,7 +59,7 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
     msf_in = mule.load_umfile(sf_in)
    
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_mule_operator.ReplaceOperator() 
 
     # Define spatial extent of grid required
     #bounds = bounding_box(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
