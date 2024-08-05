@@ -10,9 +10,9 @@ import argparse
 import shutil
 import pandas
 
-import replace_landsurface_with_ERA5land_IC
-import replace_landsurface_with_BARRA2R_IC
-import replace_landsurface_with_FF_IC
+import replace_landsurface_with_eraland_ic
+import replace_landsurface_with_barra_ic
+import replace_landsurface_with_ff_ic
 
 boolopt = {
     "True": True,
@@ -48,13 +48,13 @@ def main():
     
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
-        replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.mask, args.file, t)
+        replace_landsurface_with_eraland_ic.swap_land_era5land(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     elif "barra" in args.type:
-        replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
+        replace_landsurface_with_barra_ic.swap_land_barra(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     elif "astart" in args.type:
-        replace_landsurface_with_FF_IC.swap_land_ff(args.mask, args.file, args.hres_ic, t)
+        replace_landsurface_with_ff_ic.swap_land_ff(args.mask, args.file, args.hres_ic, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     else:
         print("No need to swap out IC")
