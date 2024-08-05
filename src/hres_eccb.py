@@ -12,6 +12,7 @@ from pathlib import Path
 
 import replace_landsurface_with_ERA5land_IC
 import replace_landsurface_with_BARRA2R_IC
+import replace_landsurface_with_FF_IC
 
 boolopt = {
     "True": True,
@@ -21,8 +22,8 @@ boolopt = {
 
 def main():
     """
-    The main function that creates a worker pool and generates single GRIB files
-    for requested date/times in parallel.
+    The main function takes a start dump and replaces the land/surface fields with those
+    from either era5-land, BARRA-R2 or a fields file.
 
     Parameters
     ----------
@@ -39,6 +40,7 @@ def main():
     parser.add_argument("--file", required=True, type=Path)
     parser.add_argument("--start", required=True, type=pandas.to_datetime)
     parser.add_argument("--type", default="era5land")
+    parser.add_argument("--hres_ic", type=Path)
     args = parser.parse_args()
     print(args)
 
@@ -53,9 +55,10 @@ def main():
     elif "barra" in args.type:
         replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
+    elif "astart" in args.type:
+        print("Replacement job for FF input files is not processed for single-level suite.")
     else:
         print("No need to swap out IC")
-
 
 if __name__ == "__main__":
     main()
