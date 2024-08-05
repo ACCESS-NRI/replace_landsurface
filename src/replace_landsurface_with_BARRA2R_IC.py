@@ -11,6 +11,7 @@ from datetime import datetime,timedelta
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
 BARRA_DIR = os.path.join(ROSE_DATA, 'etc', 'barra_r2')
+BARRA_VERSION = "latest"
 
 
 class ReplaceOperator(mule.DataOperator):
@@ -192,7 +193,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Read in the surface temperature data from the archive
     BARRA_FIELDN = 'ts'
-    indir = os.path.join(BARRA_DIR, '1hr', BARRA_FIELDN, 'v20231001')
+    indir = os.path.join(BARRA_DIR, '1hr', BARRA_FIELDN, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
 
@@ -205,7 +206,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     
     # Read in the soil moisture data (and keep to use for replacement)
     BARRA_FIELDN = 'mrsol'
-    indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, 'v20231001')
+    indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
@@ -213,7 +214,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Read in the soil temperature data (and keep to use for replacement)
     BARRA_FIELDN = 'tsl'
-    indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, 'v20231001')
+    indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
