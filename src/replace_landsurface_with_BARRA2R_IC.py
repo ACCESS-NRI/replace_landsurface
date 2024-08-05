@@ -82,7 +82,7 @@ class bounding_box_barra():
         self.latmin = latmin_index
         self.latmax = latmax_index
 
-def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
+def get_barra_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
     """
     Function to get the BARA2-R data for a single land/surface variable.
     
@@ -187,7 +187,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     # Read in the surface temperature data (and keep to use for replacement)
     BARRA_FIELDN = 'ts' #repeating here for readability
     BARRA_NLAYERS = 1
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_z_date , BARRA_NLAYERS,bounds)
+    data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_z_date , BARRA_NLAYERS,bounds)
     surface_temp = data.copy()
     
     # Read in the soil moisture data (and keep to use for replacement)
@@ -196,7 +196,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), BARRA_NLAYERS, bounds)
+    data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), BARRA_NLAYERS, bounds)
     mrsol = data.copy()
     
     # Read in the soil temperature data (and keep to use for replacement)
@@ -205,7 +205,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     indir = os.path.join(BARRA_DIR, '3hr', BARRA_FIELDN, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), BARRA_NLAYERS, bounds)
+    data = get_barra_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), BARRA_NLAYERS, bounds)
     tsl = data.copy()
     
     # Set up the output file
