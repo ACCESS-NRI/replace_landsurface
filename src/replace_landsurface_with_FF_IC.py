@@ -18,7 +18,7 @@ class ReplaceOperator(mule.DataOperator):
         print('transform')
         return sources[1]
 
-def replace_in_ff(f, sf, mf_out, replace):
+def replace_in_ff_from_ff(f, sf, mf_out, replace):
 #def replace_in_ff(f, generic_era5_fname, ERA_FIELDN, multiplier, ic_z_date, mf_out, replace, bounds):
 
     replacement_data = sf.get_data()
@@ -85,27 +85,27 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
       if f.lbuser4 == 9:
         # replace coarse soil moisture with high-res information
         if f.lblev == 4:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
         elif f.lblev == 3:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
         elif f.lblev == 2:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
         elif f.lblev == 1:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
 
       elif f.lbuser4 == 20:
         # soil temperature
         if f.lblev == 4:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
         elif f.lblev == 3:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
         elif f.lblev == 2:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
         elif f.lblev == 1:
-          replace_in_ff(f, sf, mf_out, replace)
+          replace_in_ff_from_ff(f, sf, mf_out, replace)
 
       elif f.lbuser4 == 24:
-        replace_in_ff(f, sf, mf_out, replace)
+        replace_in_ff_from_ff(f, sf, mf_out, replace)
       else:
         mf_out.fields.append(f)
    
