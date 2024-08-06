@@ -42,7 +42,6 @@ def main():
     # Convert the date/time to a formatted string
     t = args.start.strftime("%Y%m%dT%H%MZ")
     print(args.mask, args.file, t)
-    
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
         replace_landsurface_with_eraland_ic.swap_land_era5land(args.mask, args.file, t)
