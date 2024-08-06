@@ -36,7 +36,7 @@ def main():
     parser.add_argument("--file", required=True, type=Path)
     parser.add_argument("--start", required=True, type=pandas.to_datetime)
     parser.add_argument("--type", default="era5land")
-    parser.add_argument("--hres_ic", type="Path")
+    parser.add_argument("--hres_ic", type=Path)
     parser.add_argument("--input_file_type", default="ic")
     
     args = parser.parse_args()
