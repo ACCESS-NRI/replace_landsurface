@@ -38,8 +38,6 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
     
     # create date/time useful information
     print(ic_date)
-    yyyy = ic_date[0:4]
-    mm = ic_date[4:6]
     ic_z_date = ic_date.replace('T', '').replace('Z', '')
     
     # Path to input file
