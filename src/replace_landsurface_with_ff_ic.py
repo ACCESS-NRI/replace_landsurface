@@ -64,13 +64,9 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
     
     # For each field in the input write to the output file (but modify as required)
     for f,sf in zip(mf_in.fields,msf_in.fields):
-        if f.lbuser4 == 9:
-            # replace coarse soil moisture with high-res information
-            replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lbuser4 == 20:
-            # soil temperature
-            replace_in_ff_from_ff(f, sf, mf_out, replace)
-        elif f.lbuser4 == 24:
+        
+        # If the field is soil moisture, soil temperature or surface temperature, then replace.
+        if f.lbuser4 in [9, 20, 24]:
             replace_in_ff_from_ff(f, sf, mf_out, replace)
         else:
             mf_out.fields.append(f)
