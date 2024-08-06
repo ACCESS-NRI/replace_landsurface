@@ -1,4 +1,5 @@
 """Module that reads BARRA data from the netcdf archive and uses it to replace land/surface."""
+# pylint: disable=duplicate-code
 # pylint: disable=trailing-whitespace
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
