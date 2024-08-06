@@ -30,7 +30,6 @@ def main():
     -------
     None.  The ec_cb000 file is updated and overwritten
     """
-    
     # Parse the command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--mask", required=True, type=Path)
