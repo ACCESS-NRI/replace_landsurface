@@ -2,6 +2,7 @@
 # pylint: disable=trailing-whitespace
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-arguments
 import os
 import sys
 from glob import glob
@@ -178,6 +179,33 @@ def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds):
 
 def replace_in_ff_from_era5land(f, generic_era5_fname, era_fieldn, \
                                 multiplier, ic_z_date, mf_out, replace, bounds):
+    """
+    Function to replace land/surface variable with data from era5land.
+    
+    Parameters
+    ----------
+    f : Mule file
+        Open mule file to read data from
+    generic_era5_fname : Path
+        Generic path to the era5land data with "FIELDN" to be replaced by field name
+    era_fieldn : string
+        The name of the era5-land variable to read in.
+    multiplier : int
+        Number to scale the data with if needed, ignored if less than 0.
+    ic_z_date : string
+        The date-time required in "%Y%m%d%H%M" format
+    mf_out : Mule file
+        Open mule file to write data to.
+    Replace : object
+        The common_mule_operator replace object 
+    bounds : object
+        A BoundingBoxEra5land object that defines the extent of the grid required.
+        
+    Returns
+    -------
+    None.
+        The file is replaced with a version of itself holding the higher-resolution data.
+    """
     current_data = f.get_data()
     era5_fname = generic_era5_fname.replace('FIELDN', era_fieldn)
     data = get_era_nc_data(era5_fname, era_fieldn, ic_z_date, bounds)
@@ -246,12 +274,12 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
         if f.lbuser4 == 9:
             # replace coarse soil moisture with high-res information
             soil_level=f.lblev
-            replace_in_ff_from_era5land(f, generic_era5_fname, 'swvl%d'%soil_level, \
+            replace_in_ff_from_era5land(f, generic_era5_fname, f"swvl{soil_level:d}", \
                                         multipliers[soil_level-1], ic_z_date, mf_out, replace, bounds)
         elif f.lbuser4 == 20:
             # soil temperature
             soil_level=f.lblev
-            replace_in_ff_from_era5land(f, generic_era5_fname, 'stl%d'%soil_level, \
+            replace_in_ff_from_era5land(f, generic_era5_fname, f"stl{soil_level:d}", \
                                         -1, ic_z_date, mf_out, replace, bounds)
         elif f.lbuser4 == 24:
             # surface temperature
