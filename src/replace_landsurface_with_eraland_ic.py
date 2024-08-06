@@ -97,9 +97,7 @@ class BoundingBoxEra5land():
 
         # Swap the latitude min/max if upside down (is upside down for era5-land)
         if latmax_index < latmin_index:
-            tmp_index=latmin_index
-            latmin_index=latmax_index
-            latmax_index=tmp_index
+            latmin_index,latmax_index=latmax_index,latmin_index
         
         # Set the boundaries
         self.lonmin=lonmin_index
