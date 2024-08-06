@@ -1,6 +1,7 @@
 """Module that reads BARRA data from the netcdf archive and uses it to replace land/surface."""
 # pylint: disable=trailing-whitespace
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 
 import os
 import sys
@@ -91,8 +92,10 @@ class BoundingBoxBarra():
         self.latmin = latmin_index
         self.latmax = latmax_index
     def get_lons(self):
+        """ Return min/max longitude """
         return(self.lonmin,self.lonmax)
     def get_lats(self):
+        """ Return min/max latitude """
         return(self.latmin,self.latmax)
 
 def get_barra_nc_data(ncfname, fieldn, wanted_dt, nlayers, bounds):
@@ -141,7 +144,7 @@ def get_barra_nc_data(ncfname, fieldn, wanted_dt, nlayers, bounds):
             data = d[fieldn][tm, latmin_index:latmax_index+1, lonmin_index:lonmax_index+1]
     except KeyError:
         print(ncfname)
-        print(f'ERROR: Variable temp not found in file', file=sys.stderr)
+        print('ERROR: Variable temp not found in file', file=sys.stderr)
         sys.exit(1)
         
     d.close()
