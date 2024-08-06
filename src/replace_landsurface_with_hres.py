@@ -38,6 +38,8 @@ def main():
     parser.add_argument("--start", required=True, type=pandas.to_datetime)
     parser.add_argument("--type", default="era5land")
     parser.add_argument("--hres_ic", type="Path")
+    parser.add_argument("--input_file_type", default="ic")
+    
     args = parser.parse_args()
     # Convert the date/time to a formatted string
     t = args.start.strftime("%Y%m%dT%H%MZ")
@@ -50,8 +52,11 @@ def main():
         replace_landsurface_with_barra_ic.swap_land_barra(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     elif "astart" in args.type:
-        replace_landsurface_with_ff_ic.swap_land_ff(args.mask, args.file, args.hres_ic, t)
-        shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
+        if "ic" in args.input_file_type:
+            replace_landsurface_with_ff_ic.swap_land_ff(args.mask, args.file, args.hres_ic, t)
+            shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
+        else:
+           print("No need to swap out IC") 
     else:
         print("No need to swap out IC")
 if __name__ == "__main__":
