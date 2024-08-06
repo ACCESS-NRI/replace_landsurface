@@ -1,7 +1,7 @@
 """Module that reads BARRA data from the netcdf archive and uses it to replace land/surface."""
 # pylint: disable=trailing-whitespace
 import os
-#import sys
+import sys
 from glob import glob
 from pathlib import Path
 import numpy as np # pylint: disable=import-error
