@@ -3,13 +3,7 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-arguments
-import os
-import sys
-from pathlib import Path
-import iris # pylint: disable=import-error
 import mule # pylint: disable=import-error
-import numpy as np # pylint: disable=import-error
-import xarray as xr # pylint: disable=import-error
 import common_mule_operator # pylint: disable=import-error
 
 def replace_in_ff_from_ff(f, sf, mf_out, replace):
