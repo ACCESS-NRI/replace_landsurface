@@ -4,6 +4,7 @@ Replace the land/surface fields in the astart file with higher-resolution
 era5-land, BARRA2-R data or a fields file (as requested).
 """
 # pylint: disable=trailing-whitespace
+# pylint: disable=Similar lines in 2 files
 from pathlib import Path
 import argparse
 import shutil
