@@ -1,14 +1,19 @@
-import iris
-import mule
+""" Module for replacing land/surface fields with data from the another fields file. """
+# pylint: disable=trailing-whitespace
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-arguments
 import os
 import sys
-import numpy as np
 from pathlib import Path
-import xarray as xr, sys, argparse
-from datetime import datetime,timedelta
-import common_mule_operator
+import iris # pylint: disable=import-error
+import mule # pylint: disable=import-error
+import numpy as np # pylint: disable=import-error
+import xarray as xr # pylint: disable=import-error
+import common_mule_operator # pylint: disable=import-error
 
 def replace_in_ff_from_ff(f, sf, mf_out, replace):
+    """ Write the field from a different fields into the output fields file. """
     replacement_data = sf.get_data()
     mf_out.fields.append(replace([f, replacement_data]))
     
@@ -32,14 +37,7 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
     """
     
     print(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date)
-    
-    # create name of file to be replaced
-    ic_file = ic_file_fullpath.parts[-1].replace('.tmp', '')
-    
-    # create date/time useful information
-    print(ic_date)
-    ic_z_date = ic_date.replace('T', '').replace('Z', '')
-    
+        
     # Path to input file
     ff_in = ic_file_fullpath.as_posix().replace('.tmp', '')
     
