@@ -1,24 +1,30 @@
+"""Module that reads BARRA data from the netcdf archive and uses it to replace land/surface."""
 # pylint: disable=trailing-whitespace
 import os
 #import sys
 from glob import glob
 from pathlib import Path
 from datetime import datetime,timedelta
-import numpy as np # pyline: disable=import-error
-import iris # pyline: disable=import-error
-import mule # pyline: disable=import-error
-import xarray as xr, sys, argparse # pyline: disable=import-error
-import common_mule_operator # pyline: disable=import-error
+import numpy as np # pylint: disable=import-error
+import iris # pylint: disable=import-error
+import mule # pylint: disable=import-error
+import xarray as xr, sys, argparse # pylint: disable=import-error
+import common_mule_operator # pylint: disable=import-error
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
 BARRA_DIR = os.path.join(ROSE_DATA, 'etc', 'barra_r2')
 BARRA_VERSION = "latest"
 
-class Bounding_Box_Barra(): 
+class BoundingBoxBarra(): 
     """ Container class to hold spatial extent information."""
     def __init__(self):
         """ Initialization Bounding_Box_Barra class """
+        # Set the boundaries
+        self.lonmin = np.nan
+        self.lonmax = np.nan
+        self.latmin = np.nan
+        self.latmax = np.nan
     def set_bounds(self, ncfname, maskfname, var):
         """
         Initialization function for bounding_box class
@@ -185,7 +191,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
     
     # Work out the grid bounds using the surface temperature file
-    bounds = Bounding_Box_Barra()
+    bounds = BoundingBoxBarra()
     bounds.set_bounds(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
     
     # Read in the surface temperature data (and keep to use for replacement)
@@ -200,7 +206,8 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     indir = os.path.join(BARRA_DIR, '3hr', barra_fieldn, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, barra_fieldn + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-    data = get_barra_nc_data(barra_fname, barra_fieldn, ic_date.replace('T', '').replace('Z', ''), barra_nlayers, bounds)
+    data = get_barra_nc_data(barra_fname, barra_fieldn, \
+                             ic_date.replace('T', '').replace('Z', ''), barra_nlayers, bounds)
     mrsol = data.copy()
     
     # Read in the soil temperature data (and keep to use for replacement)
@@ -209,7 +216,8 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     indir = os.path.join(BARRA_DIR, '3hr', barra_fieldn, BARRA_VERSION)
     barra_files = glob(os.path.join(indir, barra_fieldn + '*' + yyyy + mm + '*nc'))
     barra_fname = os.path.join(indir, os.path.basename(barra_files[0]))
-    data = get_barra_nc_data(barra_fname, barra_fieldn, ic_date.replace('T', '').replace('Z', ''), barra_nlayers, bounds)
+    data = get_barra_nc_data(barra_fname, barra_fieldn, \
+                             ic_date.replace('T', '').replace('Z', ''), barra_nlayers, bounds)
     tsl = data.copy()
     
     # Set up the output file
