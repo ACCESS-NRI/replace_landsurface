@@ -16,7 +16,7 @@ import common_mule_operator # pylint: disable=import-error
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
-ERA_DIR = os.path.join(ROSE_DATA, 'etc', 'era5_land')
+ERA_DIR = os.path.join(ROSE_DATA, 'era5_land', 'reanalysis')
 
 # The depths of soil for the conversion
 ##########multipliers=[7.*10., 21.*10., 72.*10., 189.*10.]
