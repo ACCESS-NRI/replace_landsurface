@@ -8,9 +8,9 @@ era5-land or BARRA2-R data (if requested).
 import argparse
 import shutil
 from pathlib import Path
-import pandas
-import replace_landsurface_with_eraland_ic
-import replace_landsurface_with_barra_ic
+import pandas # pylint: disable=import-error
+import replace_landsurface_with_eraland_ic # pylint: disable=import-error
+import replace_landsurface_with_barra_ic # pylint: disable=import-error
 
 boolopt = {
     "True": True,
