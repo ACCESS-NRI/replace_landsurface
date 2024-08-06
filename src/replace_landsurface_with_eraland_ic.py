@@ -67,7 +67,7 @@ class BoundingBoxEra5land():
             d.close()
         else:
             print(f'ERROR: File {maskfname} not found', file=sys.stderr)
-            raise
+            sys.exit(1)
         
         # Read in the file from the high-res netcdf archive
         if Path(ncfname).exists():
@@ -157,7 +157,7 @@ def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds):
             data=data.data
         except KeyError:
             print(ncfname)
-            print(f'ERROR: Variable temp not found in file', file=sys.stderr)
+            print('ERROR: Variable temp not found in file', file=sys.stderr)
             sys.exit(1)
     else:
         # Data required wraps around the input grid.  Read in sections and patch together.
@@ -167,15 +167,17 @@ def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds):
             data=np.concatenate((data_left, data_right), axis=1)
         except KeyError:
             print(ncfname)
-            print(f'ERROR: Variable temp not found in file', file=sys.stderr)
+            print('ERROR: Variable temp not found in file', file=sys.stderr)
             sys.exit(1)
             
     d.close()
     
-    # Flip the data vertically because the era5-land latitudes are reversed in direction to the UM FF
+    # Flip the data vertically because the era5-land 
+    # latitudes are reversed in direction to the UM FF
     return data[::-1, :]
 
-def replace_in_ff_from_era5land(f, generic_era5_fname, era_fieldn, multiplier, ic_z_date, mf_out, replace, bounds):
+def replace_in_ff_from_era5land(f, generic_era5_fname, era_fieldn, \
+                                multiplier, ic_z_date, mf_out, replace, bounds):
     current_data = f.get_data()
     era5_fname = generic_era5_fname.replace('FIELDN', era_fieldn)
     data = get_era_nc_data(era5_fname, era_fieldn, ic_z_date, bounds)
@@ -234,7 +236,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     
     # Define spatial extent of grid required
     bounds = BoundingBoxEra5land()
-    bound.set_bounds(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
+    bounds.set_bounds(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
     
     # Set up the output file
     mf_out = mf_in.copy()
@@ -244,14 +246,17 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
         if f.lbuser4 == 9:
             # replace coarse soil moisture with high-res information
             soil_level=f.lblev
-            replace_in_ff_from_era5land(f, generic_era5_fname, 'swvl%d'%soil_level, multipliers[soil_level-1], ic_z_date, mf_out, replace, bounds)
+            replace_in_ff_from_era5land(f, generic_era5_fname, 'swvl%d'%soil_level, \
+                                        multipliers[soil_level-1], ic_z_date, mf_out, replace, bounds)
         elif f.lbuser4 == 20:
             # soil temperature
             soil_level=f.lblev
-            replace_in_ff_from_era5land(f, generic_era5_fname, 'stl%d'%soil_level, -1, ic_z_date, mf_out, replace, bounds)
+            replace_in_ff_from_era5land(f, generic_era5_fname, 'stl%d'%soil_level, \
+                                        -1, ic_z_date, mf_out, replace, bounds)
         elif f.lbuser4 == 24:
             # surface temperature
-            replace_in_ff_from_era5land(f, generic_era5_fname, 'skt', -1, ic_z_date, mf_out, replace, bounds)
+            replace_in_ff_from_era5land(f, generic_era5_fname, 'skt', \
+                                        -1, ic_z_date, mf_out, replace, bounds)
         else:
             mf_out.fields.append(f)
     # Write output file
