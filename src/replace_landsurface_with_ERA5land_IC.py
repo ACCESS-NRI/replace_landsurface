@@ -140,7 +140,7 @@ def get_ERA_nc_data(ncfname, FIELDN, wanted_dt, bounds):
     latmin_index, latmax_index = bounds.latmin, bounds.latmax
 
     # Open the file containing the data
-    print(ncfname, FIELDN)
+    print(f"Requested variable {FIELDN} in file {ncfname}.")
     if Path(ncfname).exists():
         d = xr.open_dataset(ncfname)
     else:
@@ -150,7 +150,7 @@ def get_ERA_nc_data(ncfname, FIELDN, wanted_dt, bounds):
     # Find the array index for the date/time of interest
     times=d['time'].dt.strftime("%Y%m%d%H%M").data
     TM=times.tolist().index(wanted_dt)
-    print(TM)
+    print(f"Index of requested time in data: {TM}")
 
     # Read the data
     if lonmin_index < lonmax_index: 
@@ -220,7 +220,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     ic_file = ic_file_fullpath.parts[-1].replace('.tmp', '')
    
     # create date/time useful information
-    print(ic_date)
+    print(f"Requested date: {ic_date}")
     yyyy = ic_date[0:4]
     mm = ic_date[4:6]
     ic_z_date = ic_date.replace('T', '').replace('Z', '')
@@ -238,7 +238,8 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
 
     # Path to output file 
     ff_out = ic_file_fullpath.as_posix()
-    print(ff_in, ff_out)
+    print(f"Input file: '{ff_in}'")
+    print(f"Output file: '{ff_out}'")
    
     # Read input file
     mf_in = mule.load_umfile(ff_in)
@@ -255,7 +256,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     # For each field in the input write to the output file (but modify as required)
     for f in mf_in.fields:
     
-      print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
+      print(f"{f.lbuser4=}", f"{f.lblev=}", f"{f.lblrec=}", f"{f.lbhr=}", f"{f.lbcode=}")
 
       if f.lbuser4 == 9:
         # replace coarse soil moisture with high-res information

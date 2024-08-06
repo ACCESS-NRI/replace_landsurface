@@ -49,12 +49,14 @@ def main():
     parser.add_argument('--start', required=True, type=pandas.to_datetime)
     parser.add_argument('--type', default="era5land")
     args = parser.parse_args()
-    print(args)
+    print(f"{args=}")
 
     # Convert the date/time to a formatted string
     t = args.start.strftime("%Y%m%dT%H%MZ")
-    print(args.mask, args.file, t)
-
+    print(f"mask = {args.mask}")
+    print(f"icfile = {args.file}")
+    print(f"start_time = {t}")
+    
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
         replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.mask, args.file, t)
