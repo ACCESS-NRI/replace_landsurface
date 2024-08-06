@@ -9,7 +9,7 @@ class ReplaceOperator(mule.DataOperator):
         """ Print the data from the new field """
         print('new_field')
         return sources[0]
-    def transform(self, sources):
+    def transform(self, sources, result):
         """ Tranform the data """
         print('transform')
         return sources[1]
