@@ -149,7 +149,6 @@ def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds):
     # Find the array index for the date/time of interest
     times=d['time'].dt.strftime("%Y%m%d%H%M").data
     tm=times.tolist().index(wanted_dt)
-    print(tm)
     
     # Read the data
     if lonmin_index < lonmax_index:
