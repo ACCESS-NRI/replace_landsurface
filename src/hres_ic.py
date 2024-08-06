@@ -39,7 +39,6 @@ def main():
     parser.add_argument("--type", default="era5land")
     parser.add_argument("--hres_ic", type="Path")
     args = parser.parse_args()
-    
     # Convert the date/time to a formatted string
     t = args.start.strftime("%Y%m%dT%H%MZ")
     print(args.mask, args.file, t)
@@ -55,6 +54,5 @@ def main():
         shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
     else:
         print("No need to swap out IC")
-        
 if __name__ == "__main__":
     main()
