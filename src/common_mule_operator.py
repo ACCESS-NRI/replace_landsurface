@@ -1,4 +1,4 @@
-import mule
+import mule # pylint: disable=import-error
 
 class ReplaceOperator(mule.DataOperator):
     
