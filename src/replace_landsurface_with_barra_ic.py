@@ -1,5 +1,7 @@
 """Module that reads BARRA data from the netcdf archive and uses it to replace land/surface."""
 # pylint: disable=trailing-whitespace
+# pylint: disable=too-many-locals
+
 import os
 import sys
 from glob import glob
@@ -43,23 +45,20 @@ class BoundingBoxBarra():
         
         """
         # Read in the mask and get the minimum/maximum latitude and longitude information
-        try:
-            if Path(maskfname).exists():
-                d = iris.load(maskfname, var)
-                d = d[0]
-                d = xr.DataArray.from_iris(d)
-                lons = d['longitude'].data
-                lonmin = np.min(lons)
-                lonmax = np.max(lons)
-                lats = d['latitude'].data
-                latmin = np.min(lats)
-                latmax = np.max(lats)
-                d.close()
-            else:
-                print(f'ERROR: File {maskfname} not found', file=sys.stderr)
-                raise
-        except Exception as e:
-            print(e)
+        if Path(maskfname).exists():
+            d = iris.load(maskfname, var)
+            d = d[0]
+            d = xr.DataArray.from_iris(d)
+            lons = d['longitude'].data
+            lonmin = np.min(lons)
+            lonmax = np.max(lons)
+            lats = d['latitude'].data
+            latmin = np.min(lats)
+            latmax = np.max(lats)
+            d.close()
+        else:
+            print(f'ERROR: File {maskfname} not found', file=sys.stderr)
+            return
             
         # Read in the file from the high-res netcdf archive
         if Path(ncfname).exists():
@@ -91,6 +90,10 @@ class BoundingBoxBarra():
         self.lonmax = lonmax_index
         self.latmin = latmin_index
         self.latmax = latmax_index
+    def get_lons(self):
+        return(self.lonmin,self.lonmax)
+    def get_lats(self):
+        return(self.latmin,self.latmax)
 
 def get_barra_nc_data(ncfname, fieldn, wanted_dt, nlayers, bounds):
     """
@@ -127,8 +130,8 @@ def get_barra_nc_data(ncfname, fieldn, wanted_dt, nlayers, bounds):
     tm = times.tolist().index(wanted_dt)
     
     # retrieve the spatial extends of interest
-    lonmin_index, lonmax_index = bounds.lonmin, bounds.lonmax
-    latmin_index, latmax_index = bounds.latmin, bounds.latmax
+    lonmin_index, lonmax_index = bounds.getlons()
+    latmin_index, latmax_index = bounds.getlats()
     
     # Read the data
     try:
