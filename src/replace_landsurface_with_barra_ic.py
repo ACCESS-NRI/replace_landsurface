@@ -4,11 +4,10 @@ import os
 #import sys
 from glob import glob
 from pathlib import Path
-from datetime import datetime,timedelta
 import numpy as np # pylint: disable=import-error
 import iris # pylint: disable=import-error
 import mule # pylint: disable=import-error
-import xarray as xr, sys, argparse # pylint: disable=import-error
+import xarray as xr # pylint: disable=import-error
 import common_mule_operator # pylint: disable=import-error
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
@@ -44,21 +43,23 @@ class BoundingBoxBarra():
         
         """
         # Read in the mask and get the minimum/maximum latitude and longitude information
-        if Path(maskfname).exists():
-            d = iris.load(maskfname, var)
-            d = d[0]
-            d = xr.DataArray.from_iris(d)
-            
-            lons = d['longitude'].data
-            lonmin = np.min(lons)
-            lonmax = np.max(lons)
-            lats = d['latitude'].data
-            latmin = np.min(lats)
-            latmax = np.max(lats)
-            d.close()
-        else:
-            print(f'ERROR: File {maskfname} not found', file=sys.stderr)
-            raise
+        try:
+            if Path(maskfname).exists():
+                d = iris.load(maskfname, var)
+                d = d[0]
+                d = xr.DataArray.from_iris(d)
+                lons = d['longitude'].data
+                lonmin = np.min(lons)
+                lonmax = np.max(lons)
+                lats = d['latitude'].data
+                latmin = np.min(lats)
+                latmax = np.max(lats)
+                d.close()
+            else:
+                print(f'ERROR: File {maskfname} not found', file=sys.stderr)
+                raise
+        except Exception as e:
+            print(e)
             
         # Read in the file from the high-res netcdf archive
         if Path(ncfname).exists():
@@ -162,10 +163,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     None.
         The file is replaced with a version of itself holding the higher-resolution data.
     """
-    
-    # create name of file to be replaced
-    ec_cb_file = ec_cb_file_fullpath.parts[-1].replace('.tmp', '')
-    
+        
     # create date/time useful information
     yyyy = ic_date[0:4]
     mm = ic_date[4:6]
