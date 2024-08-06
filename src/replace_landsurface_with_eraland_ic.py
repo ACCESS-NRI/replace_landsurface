@@ -1,13 +1,16 @@
-import iris
-import mule
+"""Module for replacing land/surface fields with data from the era5-land netcdf archive. """
+# pylint: disable=trailing-whitespace
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 import os
 import sys
-import numpy as np
 from glob import glob
 from pathlib import Path
-import xarray as xr, sys, argparse
-from datetime import datetime,timedelta
-import common_mule_operator
+import iris # pylint: disable=import-error
+import mule # pylint: disable=import-error
+import numpy as np # pylint: disable=import-error
+import xarray as xr # pylint: disable=import-error
+import common_mule_operator # pylint: disable=import-error
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
@@ -17,11 +20,18 @@ ERA_DIR = os.path.join(ROSE_DATA, 'etc', 'era5_land')
 ##########multipliers=[7.*10., 21.*10., 72.*10., 189.*10.]
 multipliers = [10.*10., 25.*10., 65.*10., 200.*10.]
 
-class bounding_box_era5land():
+class BoundingBoxEra5land():
     """ Container class to hold spatial extent information."""
-    def __init__(self, ncfname, maskfname, var):
+    def __init__(self):
+        """ Initialize BoundingBoxEra5land object"""
+        # Set the boundaries
+        self.lonmin=np.nan
+        self.lonmax=np.nan
+        self.latmin=np.nan
+        self.latmax=np.nan
+    def set_bounds(self, ncfname, maskfname, var):
         """
-        Initialization function for bounding_box class
+        Set bounds for bounding_box class
         
         Parameters
         ----------
@@ -95,8 +105,13 @@ class bounding_box_era5land():
         self.lonmax=lonmax_index
         self.latmin=latmin_index
         self.latmax=latmax_index
+    def get_lons(self):
+        return(self.lonmin,self.lonmax)
+    def get_lats(self):
+        return(self.latmin,self.latmax)
 
-def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds): 
+
+def get_era_nc_data(ncfname, fieldn, wanted_dt, bounds): 
     """
     Function to get the ERA5-land data for a single land/surface variable.
     
@@ -118,11 +133,11 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
     """
     
     # retrieve the spatial extends of interest
-    lonmin_index, lonmax_index = bounds.lonmin, bounds.lonmax
-    latmin_index, latmax_index = bounds.latmin, bounds.latmax
+    lonmin_index, lonmax_index = bounds.get_lons()
+    latmin_index, latmax_index = bounds.get_lats()
     
     # Open the file containing the data
-    print(ncfname, FIELDN)
+    print(ncfname, fieldn)
     if Path(ncfname).exists():
         d = xr.open_dataset(ncfname)
     else:
@@ -131,27 +146,27 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
         
     # Find the array index for the date/time of interest
     times=d['time'].dt.strftime("%Y%m%d%H%M").data
-    TM=times.tolist().index(wanted_dt)
-    print(TM)
+    tm=times.tolist().index(wanted_dt)
+    print(tm)
     
     # Read the data
     if lonmin_index < lonmax_index:
         # Grid does not wrap around.  Simple read.
         try:
-            data=d[FIELDN][TM, latmin_index:latmax_index+1, lonmin_index:lonmax_index+1]
+            data=d[fieldn][tm, latmin_index:latmax_index+1, lonmin_index:lonmax_index+1]
             data=data.data
         except KeyError:
-            print(fname)
+            print(ncfname)
             print(f'ERROR: Variable temp not found in file', file=sys.stderr)
             sys.exit(1)
     else:
         # Data required wraps around the input grid.  Read in sections and patch together.
         try:
-            data_left=d[FIELDN][TM, latmin_index:latmax_index+1, lonmin_index:].data
-            data_right=d[FIELDN][TM, latmin_index:latmax_index+1, 0:lonmax_index+1].data
+            data_left=d[fieldn][tm, latmin_index:latmax_index+1, lonmin_index:].data
+            data_right=d[fieldn][tm, latmin_index:latmax_index+1, 0:lonmax_index+1].data
             data=np.concatenate((data_left, data_right), axis=1)
         except KeyError:
-            print(fname)
+            print(ncfname)
             print(f'ERROR: Variable temp not found in file', file=sys.stderr)
             sys.exit(1)
             
@@ -160,10 +175,10 @@ def get_era_nc_data(ncfname, FIELDN, wanted_dt, bounds):
     # Flip the data vertically because the era5-land latitudes are reversed in direction to the UM FF
     return data[::-1, :]
 
-def replace_in_ff_from_era5land(f, generic_era5_fname, ERA_FIELDN, multiplier, ic_z_date, mf_out, replace, bounds):
+def replace_in_ff_from_era5land(f, generic_era5_fname, era_fieldn, multiplier, ic_z_date, mf_out, replace, bounds):
     current_data = f.get_data()
-    era5_fname = generic_era5_fname.replace('FIELDN', ERA_FIELDN)
-    data = get_era_nc_data(era5_fname, ERA_FIELDN, ic_z_date, bounds)
+    era5_fname = generic_era5_fname.replace('FIELDN', era_fieldn)
+    data = get_era_nc_data(era5_fname, era_fieldn, ic_z_date, bounds)
     if multiplier < 0:
         pass
     else:
@@ -191,9 +206,6 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
         The file is replaced with a version of itself holding the higher-resolution data.
     """
     
-    # create name of file to be replaced
-    ic_file = ic_file_fullpath.parts[-1].replace('.tmp', '')
-    
     # create date/time useful information
     print(ic_date)
     yyyy = ic_date[0:4]
@@ -201,9 +213,9 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     ic_z_date = ic_date.replace('T', '').replace('Z', '')
     
     # Find one "swvl1" file in the archive and create a generic filename
-    ERA_FIELDN = 'swvl1'
-    land_yes = os.path.join(ERA_DIR, ERA_FIELDN, yyyy)
-    era_files = glob(os.path.join(land_yes, ERA_FIELDN + '*' + yyyy + mm + '*nc'))
+    era_fieldn = 'swvl1'
+    land_yes = os.path.join(ERA_DIR, era_fieldn, yyyy)
+    era_files = glob(os.path.join(land_yes, era_fieldn + '*' + yyyy + mm + '*nc'))
     era5_fname = os.path.join(land_yes, os.path.basename(era_files[0]))
     generic_era5_fname = era5_fname.replace('swvl1', 'FIELDN')
     
@@ -221,7 +233,8 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     replace = common_mule_operator.ReplaceOperator()
     
     # Define spatial extent of grid required
-    bounds = bounding_box_era5land(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
+    bounds = BoundingBoxEra5land()
+    bound.set_bounds(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
     
     # Set up the output file
     mf_out = mf_in.copy()
