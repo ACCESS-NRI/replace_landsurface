@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 """
 Replace the land/surface fields in the astart file with higher-resolution
 era5-land, BARRA2-R data or a fields file (as requested).
 """
-# pylint: disable=trailing-whitespace
 # pylint: disable=duplicate-code
+# pylint: disable=trailing-whitespace
 from pathlib import Path
 import argparse
 import shutil
