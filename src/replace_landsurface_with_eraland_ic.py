@@ -107,8 +107,10 @@ class BoundingBoxEra5land():
         self.latmin=latmin_index
         self.latmax=latmax_index
     def get_lons(self):
+        """ Function to return min/max longitude """
         return(self.lonmin,self.lonmax)
     def get_lats(self):
+        """ Function to return min/max latitude """
         return(self.latmin,self.latmax)
 
 
@@ -275,7 +277,8 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
             # replace coarse soil moisture with high-res information
             soil_level=f.lblev
             replace_in_ff_from_era5land(f, generic_era5_fname, f"swvl{soil_level:d}", \
-                                        multipliers[soil_level-1], ic_z_date, mf_out, replace, bounds)
+                                        multipliers[soil_level-1], ic_z_date, mf_out, \
+                                        replace, bounds)
         elif f.lbuser4 == 20:
             # soil temperature
             soil_level=f.lblev
