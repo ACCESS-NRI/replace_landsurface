@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-
 """
 Replace the land/surface fields in the astart file with higher-resolution
-era5-land or BARRA2-R data (if requested).
+era5-land, BARRA2-R data or a fields file (as requested).
 """
-
+# pylint: disable=trailing-whitespace
 from pathlib import Path
 import argparse
 import shutil
@@ -56,7 +55,7 @@ def main():
             replace_landsurface_with_ff_ic.swap_land_ff(args.mask, args.file, args.hres_ic, t)
             shutil.move(args.file.as_posix(), args.file.as_posix().replace(".tmp", ""))
         else:
-           print("No need to swap out IC") 
+            print("No need to swap out IC") 
     else:
         print("No need to swap out IC")
 if __name__ == "__main__":
