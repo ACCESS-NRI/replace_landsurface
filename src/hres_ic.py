@@ -8,11 +8,10 @@ era5-land or BARRA2-R data (if requested).
 from pathlib import Path
 import argparse
 import shutil
-import pandas
-
-import replace_landsurface_with_eraland_ic
-import replace_landsurface_with_barra_ic
-import replace_landsurface_with_ff_ic
+import pandas # pylint: disable=import-error
+import replace_landsurface_with_eraland_ic # pylint: disable=import-error
+import replace_landsurface_with_barra_ic # pylint: disable=import-error
+import replace_landsurface_with_ff_ic # pylint: disable=import-error
 
 boolopt = {
     "True": True,
@@ -32,7 +31,6 @@ def main():
     -------
     None.  The astart file is updated and overwritten
     """
-
     # Parse the command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--mask", required=True, type=Path)
@@ -45,7 +43,6 @@ def main():
     # Convert the date/time to a formatted string
     t = args.start.strftime("%Y%m%dT%H%MZ")
     print(args.mask, args.file, t)
-    
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
         replace_landsurface_with_eraland_ic.swap_land_era5land(args.mask, args.file, t)
