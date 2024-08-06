@@ -235,7 +235,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
         elif f.lbuser4 == 20:
             # soil temperature
             soil_level=f.lblev
-            replace_in_ff_from_era5land(f, generic_era5_fname, 'stl%d'soil_level, -1, ic_z_date, mf_out, replace, bounds)
+            replace_in_ff_from_era5land(f, generic_era5_fname, 'stl%d'%soil_level, -1, ic_z_date, mf_out, replace, bounds)
         elif f.lbuser4 == 24:
             # surface temperature
             replace_in_ff_from_era5land(f, generic_era5_fname, 'skt', -1, ic_z_date, mf_out, replace, bounds)
