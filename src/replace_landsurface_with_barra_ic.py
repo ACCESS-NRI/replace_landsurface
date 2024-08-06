@@ -1,5 +1,7 @@
-import iris
-import mule
+# pylint: disable=trailing-whitespace
+# pyline: disable=import-error
+import iris 
+import mule 
 import os
 import sys
 import numpy as np
