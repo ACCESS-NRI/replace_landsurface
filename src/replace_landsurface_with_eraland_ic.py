@@ -1,4 +1,5 @@
 """Module for replacing land/surface fields with data from the era5-land netcdf archive. """
+# pylint: disable=duplicate-code
 # pylint: disable=trailing-whitespace
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
