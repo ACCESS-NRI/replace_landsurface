@@ -20,6 +20,7 @@ import shutil
 
 import replace_landsurface_with_ERA5land_IC 
 import replace_landsurface_with_BARRA2R_IC
+import replace_landsurface_with_FF_IC
 
 boolopt = {
     "True": True,
@@ -48,6 +49,7 @@ def main():
     parser.add_argument('--file', required=True, type=Path)
     parser.add_argument('--start', required=True, type=pandas.to_datetime)
     parser.add_argument('--type', default="era5land")
+    parser.add_argument('--hres_ic', type=Path)
     args = parser.parse_args()
     print(args)
 
@@ -62,6 +64,10 @@ def main():
     elif "barra" in args.type:
         replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
+    elif "astart" in args.type:
+        replace_landsurface_with_FF_IC.swap_land_ff(args.mask, args.file, args.hres_ic,t)
+        shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
+
     else:
         print("No need to swap out IC")
 
