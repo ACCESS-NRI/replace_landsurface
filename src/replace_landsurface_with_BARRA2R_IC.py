@@ -198,7 +198,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Read in the surface temperature data from the archive
     BARRA_FIELDN = 'ts'
-    indir = BARRA_DIR + '1hr/' + BARRA_FIELDN + '/v20231001'
+    indir = BARRA_DIR + '1hr/' + BARRA_FIELDN + '/latest'
     barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
 
@@ -211,7 +211,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     
     # Read in the soil moisture data (and keep to use for replacement)
     BARRA_FIELDN = 'mrsol'
-    indir = BARRA_DIR + '/3hr/' + BARRA_FIELDN + '/v20231001'
+    indir = BARRA_DIR + '/3hr/' + BARRA_FIELDN + '/latest'
     barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
@@ -219,7 +219,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Read in the soil temperature data (and keep to use for replacement)
     BARRA_FIELDN = 'tsl'
-    indir = BARRA_DIR + '3hr/' + BARRA_FIELDN + '/v20231001'
+    indir = BARRA_DIR + '3hr/' + BARRA_FIELDN + '/latest'
     barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
