@@ -11,6 +11,10 @@ import sys #To delete when src is a package
 srcpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'src') #To delete when src is a package
 sys.path.insert(0,srcpath) #To delete when src is a package
 
-# from hres_ic import get_time, replace_input_file_with_tmp_input_file
+from hres_ic import get_start_time
 
 del sys.path[0] #To delete when src is a package
+
+def test_get_start_time():
+    time = "199205041155"
+    assert get_start_time(time) == "19920504T1155Z"
