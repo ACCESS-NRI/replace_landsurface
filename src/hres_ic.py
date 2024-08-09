@@ -15,17 +15,28 @@ era5-land or BARRA2-R data (if requested).
 from pathlib import Path
 import argparse
 from datetime import datetime,timedelta
-import pandas
 import shutil
-
 import replace_landsurface_with_ERA5land_IC 
 import replace_landsurface_with_BARRA2R_IC
 
-boolopt = {
-    "True": True,
-    "False": False,
-}
+INPUT_TIME_FORMAT = "%Y%m%d%H%M"
+OUTPUT_TIME_FORMAT = "%Y%m%dT%H%MZ"
 
+def get_start_time(time):
+    """
+    Convert the time from the input string format to the desired string format
+
+    Parameters
+    ----------
+    time: str
+        The time in the input string format
+
+    Returns
+    -------
+    str
+        The time in the desired string format
+    """
+    return datetime.strptime(time,INPUT_TIME_FORMAT).strftime(OUTPUT_TIME_FORMAT)
 
 def main():
 
@@ -46,15 +57,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mask', required=True, type=Path)
     parser.add_argument('--file', required=True, type=Path)
-    parser.add_argument('--start', required=True, type=pandas.to_datetime)
+    parser.add_argument('--start', required=True, type=str)
     parser.add_argument('--type', default="era5land")
     args = parser.parse_args()
     print(f"{args=}")
 
     # Convert the date/time to a formatted string
-    t = args.start.strftime("%Y%m%dT%H%MZ")
+    t = get_start_time(args.start)
     print(f"mask = {args.mask}")
-    print(f"icfile = {args.file}")
+    print(f"replacement_file = {args.file}")
     print(f"start_time = {t}")
     
     # If necessary replace ERA5 land/surface fields with higher-resolution options
