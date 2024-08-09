@@ -57,6 +57,27 @@ def replace_input_file_with_tmp_input_file(tmp_path):
     else:
         raise ValueError(f"Expected a path ending in '.tmp', got '{tmp_path}'.")
 
+def parse_arguments():
+    """
+    Parses the command line arguments.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    argparse.Namespace
+        The parsed command line arguments
+    """
+    # Parse the command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mask', required=True, type=Path)
+    parser.add_argument('--file', required=True, type=Path)
+    parser.add_argument('--start', required=True, type=str)
+    parser.add_argument('--type', default="era5land")
+    return parser.parse_args()
+
 def main():
 
     """
@@ -72,13 +93,7 @@ def main():
     None.  The astart file is updated and overwritten
     """ 
 
-    # Parse the command-line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--mask', required=True, type=Path)
-    parser.add_argument('--file', required=True, type=Path)
-    parser.add_argument('--start', required=True, type=str)
-    parser.add_argument('--type', default="era5land")
-    args = parser.parse_args()
+    args = parse_arguments()
     print(f"{args=}")
 
     # Convert the date/time to a formatted string
