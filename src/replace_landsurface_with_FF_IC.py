@@ -5,15 +5,7 @@
 #
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
-import iris
 import mule
-import os
-import sys
-import numpy as np
-from glob import glob
-from pathlib import Path
-import xarray as xr, sys, argparse
-from datetime import datetime,timedelta
 
 class ReplaceOperator(mule.DataOperator):
     """ Mule operator for replacing the data"""
