@@ -14,7 +14,7 @@ era5-land or BARRA2-R data (if requested).
 
 from pathlib import Path
 import argparse
-from datetime import datetime,timedelta
+from datetime import datetime
 import shutil
 import replace_landsurface_with_ERA5land_IC 
 import replace_landsurface_with_BARRA2R_IC
@@ -37,6 +37,25 @@ def get_start_time(time):
         The time in the desired string format
     """
     return datetime.strptime(time,INPUT_TIME_FORMAT).strftime(OUTPUT_TIME_FORMAT)
+
+def replace_input_file_with_tmp_input_file(tmp_path):
+    """
+    Swaps the newly-created temporary input file with the original input file, by
+    removing the '.tmp' extension from the temporary file path.
+
+    Parameters
+    ----------
+    tmp_path: PosixPath
+        The temporary path with the '.tmp' extension.
+
+    Returns
+    -------
+    None
+    """
+    if tmp_path.suffix == '.tmp':
+        shutil.move(tmp_path, tmp_path.with_suffix(''))
+    else:
+        raise ValueError(f"Expected a path ending in '.tmp', got '{tmp_path}'.")
 
 def main():
 
@@ -71,10 +90,10 @@ def main():
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
         replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.mask, args.file, t)
-        shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
+        replace_input_file_with_tmp_input_file(args.file)
     elif "barra" in args.type:
         replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
-        shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
+        replace_input_file_with_tmp_input_file(args.file)
     else:
         print("No need to swap out IC")
 
