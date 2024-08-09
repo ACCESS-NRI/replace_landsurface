@@ -1,5 +1,5 @@
 test_data/
 .coverage
-run_*.sh
+*.sh
 __pycache__/
 *.py[cod]
