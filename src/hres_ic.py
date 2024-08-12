@@ -133,5 +133,5 @@ def main():
         print("No need to swap out IC")
 
 if __name__ == '__main__':
-    main()
+    main() # pragma: no cover
 
