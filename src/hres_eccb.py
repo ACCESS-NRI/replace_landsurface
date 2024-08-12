@@ -17,11 +17,9 @@ import argparse
 import pandas
 import shutil
 from pathlib import Path
-from datetime import datetime, timedelta
 
 import replace_landsurface_with_ERA5land_IC
 import replace_landsurface_with_BARRA2R_IC
-import replace_landsurface_with_FF_IC
 
 boolopt = {
     "True": True,

@@ -5,15 +5,7 @@
 #
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
-import iris
 import mule
-import os
-import sys
-import numpy as np
-from glob import glob
-from pathlib import Path
-import xarray as xr, sys, argparse
-from datetime import datetime,timedelta
 
 class ReplaceOperator(mule.DataOperator):
     """ Mule operator for replacing the data"""
@@ -31,7 +23,7 @@ def replace_in_ff_from_ff(f, sf, mf_out, replace):
     replacement_data = sf.get_data()
     mf_out.fields.append(replace([f, replacement_data]))
 
-def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
+def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath, ic_date):
     """
     Function to get the land/surface data from another fields file into the start dump.
 
@@ -39,8 +31,10 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath,ic_date):
     ----------
     mask_fullpath : Path
         Path to the mask defining the spatial extent
-    ic_file_fullpath : string
+    ic_file_fullpath : Path
         Path to file with the coarser resolution data to be replaced with ".tmp" appended at end
+    source_fullpath : Path
+        Path to source fields file to take the land/surface data from
     ic_date : string
         The date-time required in "%Y%m%d%H%M" format
 
