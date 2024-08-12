@@ -78,8 +78,30 @@ def parse_arguments():
     parser.add_argument('--type', default="era5land")
     return parser.parse_args()
 
-def main():
+def set_replace_function(data_type):
+    """
+    Set what replace function to use, based on the command line argument '--type'.
 
+    Parameters
+    ----------
+    data_type: str
+        Type of data source for the replacement. The value of the command line argument '--type'.
+
+    Returns
+    -------
+    callable or None
+        The function to be called for the replacement, or None if no replacement needs to take place.
+    """ 
+    if data_type == "era5land":
+        replace_function = replace_landsurface_with_ERA5land_IC.swap_land_era5land
+    elif data_type == "barra":
+        replace_function = replace_landsurface_with_BARRA2R_IC.swap_land_barra
+    else:
+        replace_function = None
+    return replace_function
+
+    
+def main():
     """
     The main function that creates a worker pool and generates single GRIB files 
     for requested date/times in parallel.
@@ -102,12 +124,10 @@ def main():
     print(f"replacement_file = {args.file}")
     print(f"start_time = {t}")
     
-    # If necessary replace ERA5 land/surface fields with higher-resolution options
-    if "era5land" in args.type:
-        replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.mask, args.file, t)
-        replace_input_file_with_tmp_input_file(args.file)
-    elif "barra" in args.type:
-        replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
+    # If necessary replace land/surface fields with higher-resolution options
+    replace_function = set_replace_function(args.type)
+    if replace_function is not None:
+        replace_function(args.mask, args.file, t)
         replace_input_file_with_tmp_input_file(args.file)
     else:
         print("No need to swap out IC")

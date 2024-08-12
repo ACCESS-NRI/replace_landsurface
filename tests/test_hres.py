@@ -12,7 +12,7 @@ import sys #To delete when src is a package
 srcpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'src') #To delete when src is a package
 sys.path.insert(0,srcpath) #To delete when src is a package
 
-from hres_ic import get_start_time, replace_input_file_with_tmp_input_file, parse_arguments
+from hres_ic import get_start_time, replace_input_file_with_tmp_input_file, parse_arguments, set_replace_function
 
 del sys.path[0] #To delete when src is a package
 
@@ -48,7 +48,7 @@ def test_parse_arguments_with_type():
     args = parse_arguments()
     assert args.type == 'newtype'
 
-@patch('sys.argv', ['program_name', '--file', 'file_path', '--start', '2024-08-12'])
+@patch('sys.argv', ['program_name', '--file', 'file_path', '--start', '202408121230'])
 def test_parse_arguments_missing_mask():
     with pytest.raises(SystemExit):
         parse_arguments()
@@ -62,3 +62,17 @@ def test_parse_arguments_missing_file():
 def test_parse_arguments_missing_start():
     with pytest.raises(SystemExit):
         parse_arguments()
+
+@patch('replace_landsurface_with_ERA5land_IC.swap_land_era5land')
+def test_set_replace_function_era5land(mock_era5land):
+    result = set_replace_function("era5land")
+    assert result == mock_era5land
+
+@patch('replace_landsurface_with_BARRA2R_IC.swap_land_barra')
+def test_set_replace_function_barra(mock_barra):
+    result = set_replace_function("barra")
+    assert result == mock_barra
+
+def test_set_replace_function_unknown():
+    result = set_replace_function("unknown")
+    assert result is None
