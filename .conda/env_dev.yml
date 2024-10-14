@@ -1,0 +1,22 @@
+name: replace-landsurface-dev
+
+channels:
+    - conda-forge
+    - accessnri
+    - coecms
+    - default
+    - nodefaults
+
+dependencies:
+    - python >=3.10,<=3.12
+    - hypothesis
+    - ipykernel
+    - mule
+    - numpy=1.23.4 # https://stackoverflow.com/a/75148219/21024780
+    - python=3.10
+    - pytest
+    - pytest-cov
+    - pre_commit
+    - scitools-iris
+    - xarray
+    - cdo

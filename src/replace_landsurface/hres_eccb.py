@@ -7,19 +7,18 @@
 
 #!/usr/bin/env python3
 
-"""
-Replace the land/surface fields in the ec_cb000 file with higher-resolution
+"""Replace the land/surface fields in the ec_cb000 file with higher-resolution
 era5-land or BARRA2-R data (if requested).
 """
 
 
 import argparse
-import pandas
 import shutil
 from pathlib import Path
 
-import replace_landsurface_with_ERA5land_IC
-import replace_landsurface_with_BARRA2R_IC
+import pandas
+
+from replace_landsurface import replace_landsurface_with_BARRA2R_IC, replace_landsurface_with_ERA5land_IC
 
 boolopt = {
     "True": True,
@@ -28,8 +27,7 @@ boolopt = {
 
 
 def main():
-    """
-    The main function that creates a worker pool and generates single GRIB files 
+    """The main function that creates a worker pool and generates single GRIB files
     for requested date/times in parallel.
 
     Parameters
@@ -39,8 +37,8 @@ def main():
     Returns
     -------
     None.  The ec_cb000 file is updated and overwritten
-    """
 
+    """
     # Parse the command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--mask', required=True, type=Path)
