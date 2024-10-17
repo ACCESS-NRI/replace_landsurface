@@ -6,8 +6,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-env:
-  PY_VERSION: "3.11"
 
 jobs:
   pre-commit:
@@ -53,7 +51,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3.0.4
         with:
           miniconda-version: "latest"
-          python-version: ${{ env.PY_VERSION }} 
+          python-version: ${{ vars.PY_VERSION }} 
           environment-file: .conda/env_build.yml
           auto-activate-base: false
           auto-update-conda: false
@@ -62,6 +60,11 @@ jobs:
       - name: Verify conda recipe
         shell: bash -el {0}
         run: conda-verify .conda --ignore C2105,C2122
+        # C2105: invalid package version for 'replace_landsurface' 
+        # (there is no git tag in this test so versioneer outputs a 
+        # version that conda-verify recognizes as 'invalid')
+        # C2122: invalid license family
+        # Reference --> https://github.com/conda/conda-verify?tab=readme-ov-file#checks
 
       - name: Run conda build
         shell: bash -el {0}
@@ -70,3 +73,9 @@ jobs:
       - name: Verify conda package
         shell: bash -el {0}
         run: conda-verify ./build/noarch/*.tar.bz2 --ignore C1105,C1115,C1141
+        # C1105: invalid version number for 'replace_landsurface' 
+        # (there is no git tag in this test so versioneer outputs a 
+        # version that conda-verify recognizes as 'invalid')
+        # C1115: Found invalid license
+        # C1141: Found python file without a corresponding pyc file
+        # Reference --> https://github.com/conda/conda-verify?tab=readme-ov-file#checks
