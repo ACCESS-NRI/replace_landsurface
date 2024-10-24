@@ -59,13 +59,13 @@ def main():
 
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
-        replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.mask, args.file, t)
+        replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.mask, args.file, t, fix_problematic_pixels="yes")
         shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
     elif "barra" in args.type:
-        replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
+        replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t, fix_problematic_pixels="yes")
         shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
     elif "astart" in args.type:
-        replace_landsurface_with_FF_IC.swap_land_ff(args.mask, args.file, args.hres_ic,t)
+        replace_landsurface_with_FF_IC.swap_land_ff(args.mask, args.file, args.hres_ic,t, fix_problematic_pixels="yes")
         shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
 
     else:

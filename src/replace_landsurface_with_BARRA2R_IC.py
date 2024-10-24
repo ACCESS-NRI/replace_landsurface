@@ -156,7 +156,7 @@ def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
     return data.data
 
 
-def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
+def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date, fix_problematic_pixels="no"):
     """
     Function to get the BARRA2-R data for all land/surface variables.
 

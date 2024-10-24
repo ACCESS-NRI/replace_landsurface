@@ -23,7 +23,7 @@ def replace_in_ff_from_ff(f, sf, mf_out, replace):
     replacement_data = sf.get_data()
     mf_out.fields.append(replace([f, replacement_data]))
 
-def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath, ic_date):
+def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath, ic_date, fix_problematic_pixels="no"):
     """
     Function to get the land/surface data from another fields file into the start dump.
 

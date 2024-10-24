@@ -196,7 +196,7 @@ def replace_in_ff(f, generic_era5_fname, ERA_FIELDN, multiplier, ic_z_date, mf_o
     data = np.where(np.isnan(data), current_data, data)
     mf_out.fields.append(replace([f, data]))
 
-def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
+def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date, fix_problematic_pixels="no"):
     """
     Function to get the ERA5-land data for all land/surface variables.
 
