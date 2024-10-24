@@ -20,18 +20,6 @@ ROSE_DATA = os.environ.get('ROSE_DATA')
 BARRA_DIR = os.path.join(ROSE_DATA, 'etc', 'barra_r2')
 
 
-class ReplaceOperator(mule.DataOperator):
-    """ Mule operator for replacing the data"""
-    def __init__(self):
-        pass
-    def new_field(self, sources):
-        print('new_field')
-        return sources[0]
-    def transform(self, sources, result):
-        print('transform')
-        return sources[1]
-
-
 class bounding_box(): 
     """ Container class to hold spatial extent information."""
     def __init__(self, ncfname, maskfname, var):
