@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright 2024 ACCESS-NRI (https://www.access-nri.org.au/)
 # See the top-level COPYRIGHT.txt file for details.
 #
@@ -5,7 +6,6 @@
 #
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
-#!/usr/bin/env python3
 
 """
 Replace the land/surface fields in the astart file with higher-resolution
