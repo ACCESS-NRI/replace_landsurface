@@ -1,5 +1,7 @@
 import mule
 import iris
+import xarray as xr
+import numpy as np
 
 class ReplaceOperator(mule.DataOperator):
     """ Mule operator for replacing the data"""
@@ -12,6 +14,22 @@ class ReplaceOperator(mule.DataOperator):
         print('transform')
         return sources[1]
 
+def replace_in_ff_problematic(f, mf_out, replace, stashcode, canopy_pixels, landsea_pixels):
+
+    current_data = f.get_data()
+    data=current_data.copy()
+
+    if stashcode == 218:
+        for j in range(len(canopy_pixels)):
+            iy=canopy_pixels[j][0]
+            ix=canopy_pixels[j][1]
+            if np.isnan(data[iy,ix]):
+                data[iy,ix]=1.
+    elif stashcode == 33:
+        for j in range(len(landsea_pixels)):
+            data[landsea_pixels[j][0],landsea_pixels[j][1]]=0.
+
+    mf_out.fields.append(replace([f, data]))
 
 def problematic_pixels(infile):
     """
