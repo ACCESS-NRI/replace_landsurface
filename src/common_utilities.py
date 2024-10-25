@@ -1,3 +1,10 @@
+# Copyright 2024 ACCESS-NRI (https://www.access-nri.org.au/)
+# See the top-level COPYRIGHT.txt file for details.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
+
 import mule
 import iris
 import xarray as xr
