@@ -249,8 +249,6 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date, fix_problematic
     # For each field in the input write to the output file (but modify as required)
     for f in mf_in.fields:
     
-      print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
-
       if f.lbuser4 == 9:
         # replace coarse soil moisture with high-res information
         if f.lblev == 4:
