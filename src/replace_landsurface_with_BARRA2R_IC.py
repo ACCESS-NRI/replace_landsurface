@@ -20,18 +20,6 @@ ROSE_DATA = os.environ.get('ROSE_DATA')
 BARRA_DIR = os.path.join(ROSE_DATA, 'etc', 'barra_r2')
 
 
-class ReplaceOperator(mule.DataOperator):
-    """ Mule operator for replacing the data"""
-    def __init__(self):
-        pass
-    def new_field(self, sources):
-        print('new_field')
-        return sources[0]
-    def transform(self, sources, result):
-        print('transform')
-        return sources[1]
-
-
 class bounding_box(): 
     """ Container class to hold spatial extent information."""
     def __init__(self, ncfname, maskfname, var):
@@ -156,7 +144,7 @@ def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
     return data.data
 
 
-def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
+def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date, fix_problematic_pixels="no"):
     """
     Function to get the BARRA2-R data for all land/surface variables.
 
@@ -187,6 +175,9 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     # Path to input file
     ff_in = ec_cb_file_fullpath.as_posix().replace('.tmp', '')
 
+    if fix_problematic_pixels == "yes":
+        canopy_pixels,landsea_pixels=problematic_pixels(ff_in)
+
     # Path to output file
     ff_out = ec_cb_file_fullpath.as_posix()
     print(ff_in, ff_out)
@@ -195,7 +186,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     mf_in = mule.load_umfile(ff_in)
     
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_utilities.ReplaceOperator() 
 
     # Read in the surface temperature data from the archive
     BARRA_FIELDN = 'ts'
@@ -232,7 +223,6 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     # For each field in the input write to the output file (but modify as required)
     for f in mf_in.fields:
     
-      print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
       if f.lbuser4 == 9:
         # replace coarse soil moisture with high-res information
         current_data = f.get_data()
@@ -251,6 +241,9 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
         data = surface_temp
         data = np.where(np.isnan(data), current_data, data)
         mf_out.fields.append(replace([f, data]))
+      elif ((f.lbuser4 == 33) or (f.lbuser4 == 218)) and fix_problematic_pixels == "yes":
+        # replace surface altitude and canopy_height
+        common_utilities.replace_in_ff_problematic(f, mf_out, replace,f.lbuser4,canopy_pixels,landsea_pixels)
       else:
         mf_out.fields.append(f)
     

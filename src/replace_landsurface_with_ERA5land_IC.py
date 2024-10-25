@@ -14,6 +14,8 @@ from glob import glob
 from pathlib import Path
 import xarray as xr, sys, argparse
 from datetime import datetime,timedelta
+import common_utilities
+
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
@@ -22,17 +24,6 @@ ERA_DIR = os.path.join(ROSE_DATA, 'etc', 'era5_land')
 # The depths of soil for the conversion
 ##########multipliers=[7.*10., 21.*10., 72.*10., 189.*10.]
 multipliers = [10.*10., 25.*10., 65.*10., 200.*10.]
-
-class ReplaceOperator(mule.DataOperator):
-    """ Mule operator for replacing the data"""
-    def __init__(self):
-        pass
-    def new_field(self, sources):
-        print('new_field')
-        return sources[0]
-    def transform(self, sources, result):
-        print('transform')
-        return sources[1]
 
 class bounding_box():
     """ Container class to hold spatial extent information."""
@@ -196,7 +187,7 @@ def replace_in_ff(f, generic_era5_fname, ERA_FIELDN, multiplier, ic_z_date, mf_o
     data = np.where(np.isnan(data), current_data, data)
     mf_out.fields.append(replace([f, data]))
 
-def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
+def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date, fix_problematic_pixels="no"):
     """
     Function to get the ERA5-land data for all land/surface variables.
 
@@ -236,6 +227,9 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     # Path to input file 
     ff_in = ic_file_fullpath.as_posix().replace('.tmp', '')
 
+    if fix_problematic_pixels == "yes":
+        canopy_pixels,landsea_pixels=common_utilities.problematic_pixels(ff_in)
+
     # Path to output file 
     ff_out = ic_file_fullpath.as_posix()
     print(ff_in, ff_out)
@@ -244,7 +238,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     mf_in = mule.load_umfile(ff_in)
    
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_utilities.ReplaceOperator() 
 
     # Define spatial extent of grid required
     bounds = bounding_box(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
@@ -255,8 +249,6 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     # For each field in the input write to the output file (but modify as required)
     for f in mf_in.fields:
     
-      print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
-
       if f.lbuser4 == 9:
         # replace coarse soil moisture with high-res information
         if f.lblev == 4:
@@ -280,7 +272,13 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
           replace_in_ff(f, generic_era5_fname, 'stl1', -1, ic_z_date, mf_out, replace, bounds)
 
       elif f.lbuser4 == 24:
+        # surface temperature
         replace_in_ff(f, generic_era5_fname, 'skt', -1, ic_z_date, mf_out, replace, bounds)
+
+      elif ((f.lbuser4 == 33) or (f.lbuser4 == 218)) and fix_problematic_pixels == "yes":
+        # surface altitude and canopy_height
+        common_utilities.replace_in_ff_problematic(f, mf_out, replace,f.lbuser4,canopy_pixels,landsea_pixels)
+
       else:
         mf_out.fields.append(f)
    
