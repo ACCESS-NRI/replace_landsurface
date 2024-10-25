@@ -14,6 +14,8 @@ from glob import glob
 from pathlib import Path
 import xarray as xr, sys, argparse
 from datetime import datetime,timedelta
+import common_utilities
+
 
 ROSE_DATA = os.environ.get('ROSE_DATA')
 # Base directory of the ERA5-land archive on NCI
@@ -225,6 +227,9 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date, fix_problematic
     # Path to input file 
     ff_in = ic_file_fullpath.as_posix().replace('.tmp', '')
 
+    if fix_problematic_pixels == "yes":
+        canopy_pixels,landsea_pixels=common_utilities.problematic_pixels(ff_in)
+
     # Path to output file 
     ff_out = ic_file_fullpath.as_posix()
     print(ff_in, ff_out)
@@ -233,7 +238,7 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date, fix_problematic
     mf_in = mule.load_umfile(ff_in)
    
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_utilities.ReplaceOperator() 
 
     # Define spatial extent of grid required
     bounds = bounding_box(era5_fname, mask_fullpath.as_posix(), "land_binary_mask")
@@ -269,7 +274,13 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date, fix_problematic
           replace_in_ff(f, generic_era5_fname, 'stl1', -1, ic_z_date, mf_out, replace, bounds)
 
       elif f.lbuser4 == 24:
+        # surface temperature
         replace_in_ff(f, generic_era5_fname, 'skt', -1, ic_z_date, mf_out, replace, bounds)
+
+      elif ((f.lbuser4 == 33) or (f.lbuser4 == 218)) and fix_problematic_pixels == "yes":
+        # surface altitude and canopy_height
+        common_utilities.replace_in_ff_problematic(f, mf_out, replace,f.lbuser4,canopy_pixels,landsea_pixels)
+
       else:
         mf_out.fields.append(f)
    

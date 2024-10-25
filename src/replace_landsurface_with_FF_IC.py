@@ -38,6 +38,9 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath, ic_date, fix_
     # Path to input file 
     ff_in = ic_file_fullpath.as_posix().replace('.tmp', '')
 
+    if fix_problematic_pixels == "yes":
+        canopy_pixels,landsea_pixels=common_utilities.problematic_pixels(ff_in)
+
     # Path to input file 
     sf_in = source_fullpath.as_posix()
 
@@ -50,7 +53,7 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath, ic_date, fix_
     msf_in = mule.load_umfile(sf_in)
    
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_utilities.ReplaceOperator() 
 
     # Set up the output file
     mf_out = mf_in.copy()
@@ -60,6 +63,9 @@ def swap_land_ff(mask_fullpath, ic_file_fullpath, source_fullpath, ic_date, fix_
     
         if f.lbuser4 in [9, 20, 24]:
             replace_in_ff_from_ff(f, sf, mf_out, replace)
+        elif ((f.lbuser4 == 33) or (f.lbuser4 == 218)) and fix_problematic_pixels == "yes":
+            # surface altitude and canopy_height
+            common_utilities.replace_in_ff_problematic(f, mf_out, replace,f.lbuser4,canopy_pixels,landsea_pixels)
         else:
             mf_out.fields.append(f)
    

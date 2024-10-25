@@ -175,6 +175,9 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date, fix_problematic
     # Path to input file
     ff_in = ec_cb_file_fullpath.as_posix().replace('.tmp', '')
 
+    if fix_problematic_pixels == "yes":
+        canopy_pixels,landsea_pixels=problematic_pixels(ff_in)
+
     # Path to output file
     ff_out = ec_cb_file_fullpath.as_posix()
     print(ff_in, ff_out)
@@ -183,7 +186,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date, fix_problematic
     mf_in = mule.load_umfile(ff_in)
     
     # Create Mule Replacement Operator
-    replace = ReplaceOperator() 
+    replace = common_utilities.ReplaceOperator() 
 
     # Read in the surface temperature data from the archive
     BARRA_FIELDN = 'ts'
@@ -239,6 +242,9 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date, fix_problematic
         data = surface_temp
         data = np.where(np.isnan(data), current_data, data)
         mf_out.fields.append(replace([f, data]))
+      elif ((f.lbuser4 == 33) or (f.lbuser4 == 218)) and fix_problematic_pixels == "yes":
+        # replace surface altitude and canopy_height
+        common_utilities.replace_in_ff_problematic(f, mf_out, replace,f.lbuser4,canopy_pixels,landsea_pixels)
       else:
         mf_out.fields.append(f)
     
