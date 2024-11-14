@@ -5,17 +5,17 @@
 #
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
-import iris
-import mule
 import os
 import sys
-import numpy as np
 from glob import glob
 from pathlib import Path
-import xarray as xr, sys, argparse
-from datetime import datetime,timedelta
 
-ROSE_DATA = os.environ.get('ROSE_DATA')
+import iris
+import mule
+import numpy as np
+import xarray as xr
+
+ROSE_DATA = os.environ.get('ROSE_DATA', "")
 # Base directory of the ERA5-land archive on NCI
 ERA_DIR = os.path.join(ROSE_DATA, 'etc', 'era5_land')
 

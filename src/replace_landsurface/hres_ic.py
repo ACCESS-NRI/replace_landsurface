@@ -5,29 +5,25 @@
 #
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
-#!/usr/bin/env python3
-
 """
-Replace the land/surface fields in the ec_cb000 file with higher-resolution
+Replace the land/surface fields in the astart file with higher-resolution
 era5-land or BARRA2-R data (if requested).
 """
 
-
 import argparse
-import pandas
 import shutil
 from pathlib import Path
 
-import replace_landsurface_with_ERA5land_IC
-import replace_landsurface_with_BARRA2R_IC
+import pandas
 
-boolopt = {
-    "True": True,
-    "False": False,
-}
-
+from replace_landsurface import (
+    replace_landsurface_with_BARRA2R_IC,
+    replace_landsurface_with_ERA5land_IC,
+    replace_landsurface_with_FF_IC,
+)
 
 def main():
+
     """
     The main function that creates a worker pool and generates single GRIB files 
     for requested date/times in parallel.
@@ -38,8 +34,8 @@ def main():
 
     Returns
     -------
-    None.  The ec_cb000 file is updated and overwritten
-    """
+    None.  The astart file is updated and overwritten
+    """ 
 
     # Parse the command-line arguments
     parser = argparse.ArgumentParser()
@@ -63,7 +59,9 @@ def main():
         replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.mask, args.file, t)
         shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
     elif "astart" in args.type:
-        print("Fields not swapped out for ECCB files when using start dump as replacement option.")
+        replace_landsurface_with_FF_IC.swap_land_ff(args.mask, args.file, args.hres_ic,t)
+        shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
+
     else:
         print("No need to swap out IC")
 
