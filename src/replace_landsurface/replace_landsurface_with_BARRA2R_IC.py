@@ -25,10 +25,10 @@ class ReplaceOperator(mule.DataOperator):
     def __init__(self):
         pass
     def new_field(self, sources):
-        print('new_field')
+        #print('new_field')
         return sources[0]
     def transform(self, sources, result):
-        print('transform')
+        #print('transform')
         return sources[1]
 
 
@@ -189,7 +189,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Path to output file
     ff_out = ec_cb_file_fullpath.as_posix()
-    print(ff_in, ff_out)
+    #print(ff_in, ff_out)
     
     # Read input file
     mf_in = mule.load_umfile(ff_in)
@@ -199,8 +199,8 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Read in the surface temperature data from the archive
     BARRA_FIELDN = 'ts'
-    indir = BARRA_DIR + '1hr/' + BARRA_FIELDN + '/latest'
-    barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
+    indir = os.path.join(BARRA_DIR, '1hr',BARRA_FIELDN, 'latest')
+    barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
 
     # Work out the grid bounds using the surface temperature file
@@ -212,16 +212,16 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     
     # Read in the soil moisture data (and keep to use for replacement)
     BARRA_FIELDN = 'mrsol'
-    indir = BARRA_DIR + '/3hr/' + BARRA_FIELDN + '/latest'
-    barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
+    indir = os.path.join(BARRA_DIR, '3hr',BARRA_FIELDN, 'latest')
+    barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
     mrsol = data.copy()
 
     # Read in the soil temperature data (and keep to use for replacement)
     BARRA_FIELDN = 'tsl'
-    indir = BARRA_DIR + '3hr/' + BARRA_FIELDN + '/latest'
-    barra_files = glob(indir + '/' + BARRA_FIELDN + '*' + yyyy + mm + '*nc')
+    indir = os.path.join(BARRA_DIR, '3hr',BARRA_FIELDN, 'latest')
+    barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
     data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
     tsl = data.copy()
@@ -232,7 +232,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     # For each field in the input write to the output file (but modify as required)
     for f in mf_in.fields:
     
-      print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
+      #print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
       if f.lbuser4 == 9:
         # replace coarse soil moisture with high-res information
         current_data = f.get_data()
