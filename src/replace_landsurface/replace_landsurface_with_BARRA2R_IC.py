@@ -189,7 +189,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
 
     # Path to output file
     ff_out = ec_cb_file_fullpath.as_posix()
-    #print(ff_in, ff_out)
+    print(ff_in, ff_out)
     
     # Read input file
     mf_in = mule.load_umfile(ff_in)
