@@ -101,7 +101,12 @@ compare() {
         exit 1
     fi
 }
+run_test() {
+    run_command
+    compare
+}
 # # -----------------------------------------------------------------
+declare -A pids # Associative array (similar to a dictionary in Python)
 # Test hres_ic
 entry_point=hres_ic
 
@@ -114,8 +119,7 @@ TYPE=era5land
 START=202202260000
 
 echo "### Test 1: hres_ic, type 'era5land' ###"
-run_command
-compare
+run_test & pids[1]+=$!
 
 # # Test 2: 'barra'
 # MASK=/scratch/tm70/cbe563/cylc-run/u-dg767.b/share/data/ancils/Lismore/d1100/qrparm.mask
@@ -126,8 +130,7 @@ TYPE=barra
 START=202008090000
 
 echo "### Test 2: hres_ic, type 'barra' ###"
-run_command
-compare
+run_test & pids[2]+=$!
 
 # # Test 2: 'barra'
 # MASK=/scratch/tm70/cbe563/cylc-run/u-dg767/share/data/ancils/Lismore/d0198/qrparm.mask
@@ -138,5 +141,35 @@ TYPE=astart
 START=202112310000
 
 echo "### Test 3: hres_ic, type 'astart' ###"
-run_command
-compare
+run_test & pids[3]+=$!
+
+
+# Capture the exit status of each background processes dynamically
+declare -A exit_statuses # Associative array (similar to a dictionary in Python)
+for pid in "${pids[@]}"; do
+    # Find which test the pid corresponds to
+    for key in "${!pids[@]}"; do
+        if [[ ${pids[$key]} == $pid ]]; then
+            test_num=$key
+            break
+        fi
+    done
+    wait $pid  # Waits for the next job in the list to finish (not necessarily in order because it's used within a loop)
+    exit_status=$?
+    exit_statuses[$test_num]=$exit_status
+done
+
+# Exit with a status 1 if any of the tests failed
+exit_value=0
+for ind in ${!exit_statuses[@]}; do
+    if [ ${exit_statuses[$ind]} -ne 0 ]; then
+        echo "Test $ind failed."
+        exit_value=1
+    fi
+done
+
+if [ $exit_value -eq 0 ]; then
+    echo "All tests passed."
+else
+    exit 1
+fi
