@@ -9,6 +9,8 @@ OUTPUT_DIR=$TEST_DATA_DIR/expected_outputs
 DRIVING_DATA_DIR=$TEST_DATA_DIR/driving_data
 CLEAN_OUTPUT=true
 
+declare -A pids # Associative array (similar to a dictionary in Python)
+
 # Create a temporary work directory
 WORK_DIR=$(mktemp -d)
 echo -e "Work directory: $WORK_DIR\n"
@@ -106,7 +108,6 @@ run_test() {
     compare
 }
 # # -----------------------------------------------------------------
-declare -A pids # Associative array (similar to a dictionary in Python)
 # Test hres_ic
 entry_point=hres_ic
 
@@ -119,7 +120,7 @@ TYPE=era5land
 START=202202260000
 
 echo "### Test 1: hres_ic, type 'era5land' ###"
-run_test & pids[1]+=$!
+run_test > /dev/null & pids[1]+=$!
 
 # # Test 2: 'barra'
 # MASK=/scratch/tm70/cbe563/cylc-run/u-dg767.b/share/data/ancils/Lismore/d1100/qrparm.mask
@@ -130,7 +131,7 @@ TYPE=barra
 START=202008090000
 
 echo "### Test 2: hres_ic, type 'barra' ###"
-run_test & pids[2]+=$!
+run_test > /dev/null & pids[2]+=$!
 
 # # Test 2: 'barra'
 # MASK=/scratch/tm70/cbe563/cylc-run/u-dg767/share/data/ancils/Lismore/d0198/qrparm.mask
@@ -141,7 +142,7 @@ TYPE=astart
 START=202112310000
 
 echo "### Test 3: hres_ic, type 'astart' ###"
-run_test & pids[3]+=$!
+run_test > /dev/null & pids[3]+=$!
 
 
 # Capture the exit status of each background processes dynamically
