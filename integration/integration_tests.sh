@@ -3,7 +3,7 @@
 # Basic binary compatibility test script for replace_landsurface.
 # See INTEGRATION_README.md for details on test usage, data and options.
 
-TEST_DATA_DIR=/g/data/tm70/dm5220/projects/replace_landsurface/test_data
+TEST_DATA_DIR=/g/data/vk83/testing/data/replace_landsurface/integration_tests
 INPUT_DIR=$TEST_DATA_DIR/input_data
 OUTPUT_DIR=$TEST_DATA_DIR/expected_outputs
 DRIVING_DATA_DIR=$TEST_DATA_DIR/driving_data
@@ -16,14 +16,19 @@ WORK_DIR=$(mktemp -d)
 echo -e "Work directory: $WORK_DIR\n"
 # Trap signals to clean up WORK directory depending on exit status
 functrap() {
-    code="$?"
-    if ([ "$code" -eq 0 ] && $CLEAN_OUTPUT) || [ "$code" -eq 2 ]; then
+    exit_code="$?"
+    if [ "$exit_code" -eq 0 ] && $CLEAN_OUTPUT; then # Job completed successfully and CLEAN_OUTPUT is true
         rm -rf "$WORK_DIR"
         echo "Work directory cleaned up."
+    elif [ "$exit_code" -eq 2 ]; then # Job was terminated preventively (did not fail)
+        kill -9 $(jobs -p) &> /dev/null # Kill all background jobs
+        rm -rf "$WORK_DIR"
+        echo "Script was terminated preventively."
+        echo "Work directory cleaned up. Background jobs killed."
     fi
 }
 # Separate the cases when the script is interrupted, from the cases when it's not
-trap "exit 2" SIGHUP SIGINT SIGQUIT SIGILL SIGABRT SIGTERM
+trap "exit 2" SIGHUP SIGINT SIGQUIT SIGILL SIGABRT SIGTERM SIGSTOP
 trap functrap EXIT
 
 #Set up the work directory as a copy of the test data directory
@@ -97,9 +102,10 @@ run_command() {
     eval "$entry_point --mask $MASK --file ${FILE}.tmp --start $START --hres_ic $HRES_IC --type $TYPE"
 }
 compare() {
-    cmp $WORK_DIR/$test_dir/file $OUTPUT_DIR/$test_dir
+    test_num=${test_dir#test_}
+    cmp $WORK_DIR/$test_dir/file $OUTPUT_DIR/output_${test_num}
     if [ $? -ne 0 ]; then
-        echo "Test ${test_dir#test} failed."
+        echo "Test $test_num failed."
         exit 1
     fi
 }
@@ -143,7 +149,6 @@ START=202112310000
 
 echo "### Test 3: hres_ic, type 'astart' ###"
 run_test > /dev/null & pids[3]+=$!
-
 
 # Capture the exit status of each background processes dynamically
 declare -A exit_statuses # Associative array (similar to a dictionary in Python)
