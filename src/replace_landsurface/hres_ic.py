@@ -9,12 +9,6 @@
 Replace the land/surface fields in the astart file with higher-resolution
 era5-land or BARRA2-R data (if requested).
 """
-#TODO: delete after testing
-# barra_fname='/g/data/vk83/testing/data/replace_landsurface/integration_tests/driving_data/etc/barra_r2/1hr/ts/latest/ts_AUS-11_ERA5_historical_hres_BOM_BARRA-R2_v1_1hr_202008-202008.nc'
-# fname='/g/data/tm70/cbe563/test_replace_land_surface/BARRAR2/GAL9_astart'
-# mask='/scratch/tm70/cbe563/cylc-run/u-dg767.b/share/data/ancils/Lismore/d1100/qrparm.mask'
-# date='202008090320'
-#TODO: delete after testing
 
 import argparse
 import shutil
