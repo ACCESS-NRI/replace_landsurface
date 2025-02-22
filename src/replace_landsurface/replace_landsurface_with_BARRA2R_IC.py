@@ -6,17 +6,14 @@
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
 import os
-import sys
 from glob import glob
 from pathlib import Path
 from collections import namedtuple
 
-import iris
 import mule
 import numpy as np
 import xarray as xr
 import warnings
-
 
 STASH_LAND_MASK = 30
 ROSE_DATA = os.environ.get('ROSE_DATA', "")
