@@ -10,5 +10,6 @@ dependencies:
   - scitools-iris
   - xarray
   - versioneer
+  - ipykernel
   - pytest
   - hypothesis
