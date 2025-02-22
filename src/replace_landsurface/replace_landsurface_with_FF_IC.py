@@ -6,6 +6,9 @@
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
 import mule
+import os
+
+TEMPORARY_SUFFIX = '.tmp'
 
 class ReplaceOperator(mule.DataOperator):
     """ Mule operator for replacing the data"""
@@ -27,7 +30,7 @@ def swap_land_ff(ic_file_fullpath, source_fullpath):
     Parameters
     ----------
     ic_file_fullpath : Path
-        Path to file with the coarser resolution data to be replaced with ".tmp" appended at end
+        Path to file with the coarser resolution data to be replaced with high resolution data
     source_fullpath : Path
         Path to source fields file to take the land/surface data from
 
@@ -38,10 +41,10 @@ def swap_land_ff(ic_file_fullpath, source_fullpath):
     """
    
     # Path to input file 
-    ff_in = ic_file_fullpath.as_posix().replace('.tmp', '')
+    ff_in = ic_file_fullpath.as_posix()
 
     # Path to output file 
-    ff_out = ic_file_fullpath.as_posix()
+    ff_out_tmp = ff_in + TEMPORARY_SUFFIX
 
     # Path to source input file 
     sf_in = source_fullpath.as_posix()
@@ -66,4 +69,6 @@ def swap_land_ff(ic_file_fullpath, source_fullpath):
    
     # Write output file
     mf_out.validate = lambda *args, **kwargs: True
-    mf_out.to_file(ff_out)
+    mf_out.to_file(ff_out_tmp)
+    # Replace input file with temporary output file
+    os.rename(ff_out_tmp, ff_in)

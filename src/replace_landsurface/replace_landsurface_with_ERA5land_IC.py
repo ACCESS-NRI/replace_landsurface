@@ -15,6 +15,7 @@ import mule
 import numpy as np
 import xarray as xr
 
+TEMPORARY_SUFFIX = '.tmp'
 DECIMAL_PRECISION = 4
 STASH_LAND_MASK = 30
 ROSE_DATA = os.environ.get('ROSE_DATA', "")
@@ -149,7 +150,7 @@ def swap_land_era5land(ic_file_fullpath, date):
     Parameters
     ----------
     ic_file_fullpath : string
-        Path to file with the coarser resolution data to be replaced with ".tmp" appended at end
+        Path to file with the coarser resolution data to be replaced with high resolution data
     date : string
         The date in the format "YYYYmmddHHMM".
 
@@ -164,9 +165,9 @@ def swap_land_era5land(ic_file_fullpath, date):
     mm = date[4:6]
 
     # Path to input file 
-    ff_in = ic_file_fullpath.as_posix().replace('.tmp', '')
+    ff_in = ic_file_fullpath.as_posix()
     # Path to output file 
-    ff_out = ic_file_fullpath.as_posix()
+    ff_out_tmp = ff_in + TEMPORARY_SUFFIX
     
     # Read input file
     mf_in = mule.load_umfile(ff_in)
@@ -219,4 +220,6 @@ def swap_land_era5land(ic_file_fullpath, date):
    
     # Write output file
     mf_out.validate = lambda *args, **kwargs: True
-    mf_out.to_file(ff_out)
+    mf_out.to_file(ff_out_tmp)
+    # Replace original input file with temporary output file
+    os.rename(ff_out_tmp, ff_in)

@@ -11,7 +11,6 @@ era5-land or BARRA2-R data (if requested).
 """
 
 import argparse
-import shutil
 from pathlib import Path
 
 from replace_landsurface import (
@@ -46,13 +45,10 @@ def main():
     # If necessary replace ERA5 land/surface fields with higher-resolution options
     if "era5land" in args.type:
         replace_landsurface_with_ERA5land_IC.swap_land_era5land(args.file, args.start)
-        shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
     elif "barra" in args.type:
         replace_landsurface_with_BARRA2R_IC.swap_land_barra(args.file, args.start)
-        shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
     elif "astart" in args.type:
         replace_landsurface_with_FF_IC.swap_land_ff(args.file, args.hres_ic)
-        shutil.move(args.file.as_posix(), args.file.as_posix().replace('.tmp', ''))
     else:
         print("No need to swap out IC")
 
