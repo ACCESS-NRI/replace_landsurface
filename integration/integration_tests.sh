@@ -99,7 +99,7 @@ run_command() {
     MASK=$WORK_DIR/$test_dir/mask
     FILE=$WORK_DIR/$test_dir/file
     HRES_IC=$WORK_DIR/$test_dir/hres_ic
-    eval "$entry_point --mask $MASK --file ${FILE}.tmp --start $START --hres_ic $HRES_IC --type $TYPE"
+    eval "$entry_point --file ${FILE}.tmp --start $START --hres_ic $HRES_IC --type $TYPE"
 }
 compare() {
     test_num=${test_dir#test_}
