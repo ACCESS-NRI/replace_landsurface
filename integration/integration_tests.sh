@@ -119,7 +119,7 @@ entry_point=hres_ic
 
 # Test 1: 'era5land'
 # MASK=/scratch/tm70/cbe563/cylc-run/u-dg767/share/data/ancils/Lismore/d1000/qrparm.mask
-# FILE=g/data/tm70/cbe563/test_replace_land_surface/ERA5LAND/GAL9_astart
+# FILE=/g/data/tm70/cbe563/test_replace_land_surface/ERA5LAND/GAL9_astart
 # HRES_IC=NOT_SET
 test_dir=test_1
 TYPE=era5land
@@ -139,7 +139,7 @@ START=202008090000
 echo "### Test 2: hres_ic, type 'barra' ###"
 run_test > /dev/null & pids[2]+=$!
 
-# # Test 2: 'barra'
+# # Test 3: 'astart'
 # MASK=/scratch/tm70/cbe563/cylc-run/u-dg767/share/data/ancils/Lismore/d0198/qrparm.mask
 # FILE=/g/data/tm70/cbe563/test_replace_land_surface/ASTART/RAL3P2_astart
 # HRES_IC=/scratch/tm70/cbe563/cylc-run/u-dg768.worked/share/cycle/20220226T0000Z/Lismore/d0198/RAL3P2/ics/RAL3P2_astart
