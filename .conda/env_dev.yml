@@ -10,6 +10,7 @@ dependencies:
   - scitools-iris
   - xarray
   - versioneer
+  - ipykernel
   - pytest
   - pytest-cov
   - pytest-xdist
