@@ -28,16 +28,22 @@ BoundingBox = namedtuple("BoundingBox", ("latmin", "latmax", "lonmin", "lonmax")
 
 
 class ReplaceOperator(mule.DataOperator):
-    """Mule operator for replacing the data of a field"""
+    """
+    Mule operator for replacing the data of a field.
+    By default, the operator will leave the original field unchanged and return a new field as a copy of the original, with the new data.
+    Set 'in_place=True' to replace the data of the original field instead (a reference to the field will still be returned).
+    """
+    def __init__(self, in_place: bool = False) -> None:
+        self.in_place = in_place
 
-    def __init__(self) -> None:
-        pass
+    def new_field(self, sources: tuple[mule.Field,np.ndarray]) -> mule.Field:
+        source_field = sources[0]
+        new_field = source_field if self.in_place else source_field.copy()
+        return new_field
 
-    def new_field(self, source_field: mule.Field) -> mule.Field:
-        return source_field.copy()
-
-    def transform(self, source_field, newdata: np.ndarray) -> np.ndarray:
-        return newdata
+    def transform(self, sources: tuple[mule.Field,np.ndarray], result) -> np.ndarray:
+        new_data = sources[1]
+        return new_data
 
 
 def get_bounding_box(mule_file: mule.UMFile) -> BoundingBox:
@@ -131,6 +137,7 @@ def get_hres_data(
     var_name: str,
     date: str,
     bounds: BoundingBox,
+    depth_index: int | None = None,
 ) -> np.ndarray:
     """
     Get the high-resolution data from the data_source file.
@@ -146,6 +153,8 @@ def get_hres_data(
         The date in the format "YYYYmmddHHMM".
     bounds : BoundingBox
         BoundingBox namedtuple containing the spatial extent to retrieve the data.
+    depth_index : int
+        The index of the vertical depth dimension.
 
     Returns
     -------
@@ -202,11 +211,15 @@ def get_hres_data(
             f"Using the nearest date '{actual_date}' instead."
         )
 
-    # Select the spatial extent
+    # Select the horizontal spatial extent
     data = data.sel({
         latitude_name: slice(bounds.latmin, bounds.latmax),
         longitude_name: slice(bounds.lonmin, bounds.lonmax),
     })
+
+    # Select the vertical depth if needed
+    if depth_index is not None:
+        data = data.isel({'depth': depth_index})
     return data.data
 
 def get_new_data(
@@ -216,12 +229,11 @@ def get_new_data(
     date: str,
     bounds: BoundingBox,
     multiplier: float = 1,
+    depth_index: int | None = None,
 ) -> np.ndarray:
     """
     Get the new high-resolution data for the replacement.
 
-    Parameters
-    ----------
 
 
     Returns
@@ -230,7 +242,7 @@ def get_new_data(
         A numpy array containing the new data.
     """
     current_data = field.get_data()
-    data = get_hres_data(fname, var_name, date, bounds)
+    data = get_hres_data(fname, var_name, date, bounds, depth_index)
     data = data * multiplier
     # If data is missing, keep the original data
     new_data = np.where(np.isnan(data), current_data, data)
@@ -245,6 +257,17 @@ def get_era5land_fname(var_name: str, date: str):
         fname = glob(os.path.join(indir, f'*_{year}{month}??-{year}{month}??.nc'))[0]
     except IndexError:
         raise FileNotFoundError(f"No ERA5-Land file found in '{indir}' for date '{date}'.")
+    return fname
+
+def get_barra_fname(var_name: str, frequency: str, date: str):
+    BARRA_DIR = os.path.join(ROSE_DATA, "etc", "barra_r2")
+    year = date[0:4]
+    month = date[4:6]
+    indir = os.path.join(BARRA_DIR, frequency, var_name, 'latest')
+    try:
+        fname = glob(os.path.join(indir, f'*_{year}{month}-{year}{month}.nc'))[0]
+    except IndexError:
+        raise FileNotFoundError(f"No BARRA-R2 file found in '{indir}' for date '{date}'.")
     return fname
 
 def swap_land_era5land(
@@ -274,10 +297,8 @@ def swap_land_era5land(
     """
     # The depths of soil for the conversion
     SOIL_MULTIPLIERS = (100.0, 250.0, 650.0, 2000.0)
-    # Base directory of the ERA5-land archive on NCI
 
     mf_out = mf_in.copy(include_fields=True)
-    # Find one "swvl1" file in the archive and create a generic filename
    
     # For each field in the input write to the output file (but modify as required)
     for indf,field in enumerate(mf_in.fields):
@@ -295,9 +316,58 @@ def swap_land_era5land(
                 multiplier = 1
             fname = get_era5land_fname(var_name, date)
             new_data = get_new_data(field, fname, var_name, date, bounds, multiplier)
-            mf_out.fields[indf] = replace_operator(field, new_data)
+            mf_out.fields[indf] = replace_operator((field, new_data))
     return mf_out
-   
+
+def swap_land_barra(
+    mf_in: mule.UMFile,
+    date: str,
+    replace_operator: ReplaceOperator,
+    bounds: BoundingBox,
+) -> mule.UMFile:
+    """
+    Replace the input file with the high-resolution barra data.
+
+    Parameters
+    ----------
+    mf_in : mule.UMFile
+        The input file with the coarser resolution data to be replaced with the high-resolution one.
+    date : string
+        The requested date for the high-resolution data, in the format "YYYYmmddHHMM".
+    replace_operator : ReplaceOperator
+        The Mule operator for replacing the data.
+    bounds : BoundingBox
+        The spatial extent for the replacement.
+    
+    Returns
+    -------
+    mf_out : mule.UMFile.
+        The output mule UMFile containing the updated data.
+    """
+
+    mf_out = mf_in.copy(include_fields=True)
+
+    # For each field in the input write to the output file (but modify as required)
+    for indf,field in enumerate(mf_in.fields):
+        lblev = field.lblev
+        stash = field.lbuser4
+        if stash in (STASH_SOIL_MOISTURE, STASH_SOIL_TEMPERATURE, STASH_SURFACE_TEMPERATURE):
+            if field.lbuser4 == STASH_SOIL_MOISTURE:
+                var_name = "mrsol"
+                frequency = "3hr"
+                depth_index = lblev - 1
+            elif field.lbuser4 == STASH_SOIL_TEMPERATURE:
+                var_name = "tsl"
+                frequency = "3hr"
+                depth_index = lblev - 1
+            elif field.lbuser4 == STASH_SURFACE_TEMPERATURE:
+                var_name = "ts"
+                frequency = "1hr"
+                depth_index = None
+            fname = get_barra_fname(var_name, frequency, date)
+            new_data = get_new_data(field, fname, var_name, date, bounds, depth_index=depth_index)
+            mf_out.fields[indf] = replace_operator((field, new_data))
+    return mf_out
 
 def swap_land(fname: Path, date: str, source_data_type: str) -> None:
     """
@@ -333,12 +403,13 @@ def swap_land(fname: Path, date: str, source_data_type: str) -> None:
     replace_op = ReplaceOperator()
 
     if source_data_type == "era5land":
-        mf_out = swap_land_era5land(mf_in, date, replace_op, bounds)
+        swap_land_function = swap_land_era5land
     elif source_data_type == "barra":
-        mf_out = swap_land_barra()
+        swap_land_function = swap_land_barra
     else:
         raise ValueError(f"Unsupported source_data_type: {source_data_type}")
 
+    mf_out = swap_land_function(mf_in, date, replace_op, bounds)
     # Write output file
     mf_out.validate = lambda *args, **kwargs: True
     mf_out.to_file(ff_out_tmp)
