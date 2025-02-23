@@ -12,7 +12,7 @@ era5-land or BARRA2-R data (if requested).
 
 import argparse
 from pathlib import Path
-from replace_landsurface import replace_landsurface, replace_landsurface_with_FF_IC
+from replace_landsurface import replace_landsurface
 
 def main():
 
@@ -38,10 +38,8 @@ def main():
     args = parser.parse_args()
 
     # If necessary replace ERA5 land/surface fields with higher-resolution options
-    if args.type in ("era5land", "barra"):
-        replace_landsurface.swap_land(args.file, args.start, args.type)
-    elif args.type == "astart":
-        replace_landsurface_with_FF_IC.swap_land_ff(args.file, args.hres_ic)
+    if args.type in ("era5land", "barra", "astart"):
+        replace_landsurface.swap_land(args.file, args.start, args.type, args.hres_ic)
     else:
         raise ValueError(f"Unsupported '--type' argument: {args.type}")
 

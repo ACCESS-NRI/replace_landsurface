@@ -30,20 +30,16 @@ BoundingBox = namedtuple("BoundingBox", ("latmin", "latmax", "lonmin", "lonmax")
 class ReplaceOperator(mule.DataOperator):
     """
     Mule operator for replacing the data of a field.
-    By default, the operator will leave the original field unchanged and return a new field as a copy of the original, with the new data.
-    Set 'in_place=True' to replace the data of the original field instead (a reference to the field will still be returned).
     """
-    def __init__(self, in_place: bool = False) -> None:
-        self.in_place = in_place
+    def __init__(self) -> None:
+        pass
 
     def new_field(self, sources: tuple[mule.Field,np.ndarray]) -> mule.Field:
-        source_field = sources[0]
-        new_field = source_field if self.in_place else source_field.copy()
-        return new_field
+        return sources[0]
 
     def transform(self, sources: tuple[mule.Field,np.ndarray], result) -> np.ndarray:
-        new_data = sources[1]
-        return new_data
+        return sources[1]
+        return
 
 
 def get_bounding_box(mule_file: mule.UMFile) -> BoundingBox:
@@ -275,6 +271,7 @@ def swap_land_era5land(
     date: str,
     replace_operator: ReplaceOperator,
     bounds: BoundingBox,
+    mf_source_data: mule.UMFile | None,
 ) -> mule.UMFile:
     """
     Replace the input file with the high-resolution era5-land data.
@@ -289,6 +286,8 @@ def swap_land_era5land(
         The Mule operator for replacing the data.
     bounds : BoundingBox
         The spatial extent for the replacement.
+    mf_source_data : mule.UMFile
+        The high resolution file to get the data from.
     
     Returns
     -------
@@ -324,6 +323,7 @@ def swap_land_barra(
     date: str,
     replace_operator: ReplaceOperator,
     bounds: BoundingBox,
+    mf_source_data: mule.UMFile | None,
 ) -> mule.UMFile:
     """
     Replace the input file with the high-resolution barra data.
@@ -338,6 +338,8 @@ def swap_land_barra(
         The Mule operator for replacing the data.
     bounds : BoundingBox
         The spatial extent for the replacement.
+    mf_source_data : mule.UMFile
+        The high resolution file to get the data from.
     
     Returns
     -------
@@ -369,7 +371,49 @@ def swap_land_barra(
             mf_out.fields[indf] = replace_operator((field, new_data))
     return mf_out
 
-def swap_land(fname: Path, date: str, source_data_type: str) -> None:
+def swap_land_ff(
+    mf_in: mule.UMFile,
+    date: str,
+    replace_operator: ReplaceOperator,
+    bounds: BoundingBox,
+    mf_source_data: mule.UMFile | None,
+) -> mule.UMFile:
+    """
+    Replace the input file with the high-resolution fieldsfile data.
+
+    Parameters
+    ----------
+    mf_in : mule.UMFile
+        The input file with the coarser resolution data to be replaced with the high-resolution one.
+    date : string
+        The requested date for the high-resolution data, in the format "YYYYmmddHHMM".
+    replace_operator : ReplaceOperator
+        The Mule operator for replacing the data.
+    bounds : BoundingBox
+        The spatial extent for the replacement.
+    mf_source_data : mule.UMFile
+        The high resolution file to get the data from.
+    
+    Returns
+    -------
+    mf_out : mule.UMFile.
+        The output mule UMFile containing the updated data.
+    """
+
+    mf_out = mf_in.copy(include_fields=True)
+    # For each field in the input write to the output file (but modify as required)
+    for indf,field in enumerate(mf_in.fields):
+        if field.lbuser4 in (STASH_SOIL_MOISTURE, STASH_SOIL_TEMPERATURE, STASH_SURFACE_TEMPERATURE):
+            new_data = mf_source_data.fields[indf].get_data()
+            mf_out.fields[indf] = replace_operator((field, new_data))
+    return mf_out
+
+def swap_land(
+    fname: Path,
+    date: str,
+    source_data_type: str,
+    source_data_fname: Path | None,
+) -> None:
     """
     Replace the input file with the high-resolution data.
 
@@ -395,21 +439,25 @@ def swap_land(fname: Path, date: str, source_data_type: str) -> None:
     
     # Read the input file
     mf_in = mule.load_umfile(ff_in)
+    # Read the source data file
+    mfs_in = mule.load_umfile(source_data_fname.as_posix()) if source_data_type == 'astart' else None
     
-    # Get the spatial extent for the replacement
-    bounds = get_bounding_box(mf_in)
-
     # Create a Mule Replacement Operator
     replace_op = ReplaceOperator()
+
+    # Get the spatial extent for the replacement
+    bounds = get_bounding_box(mf_in)
 
     if source_data_type == "era5land":
         swap_land_function = swap_land_era5land
     elif source_data_type == "barra":
         swap_land_function = swap_land_barra
+    elif source_data_type == "astart":
+        swap_land_function = swap_land_ff
     else:
         raise ValueError(f"Unsupported source_data_type: {source_data_type}")
 
-    mf_out = swap_land_function(mf_in, date, replace_op, bounds)
+    mf_out = swap_land_function(mf_in, date, replace_op, bounds, mfs_in)
     # Write output file
     mf_out.validate = lambda *args, **kwargs: True
     mf_out.to_file(ff_out_tmp)
