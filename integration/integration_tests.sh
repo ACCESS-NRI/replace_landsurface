@@ -31,11 +31,12 @@ functrap() {
 trap "exit 2" SIGHUP SIGINT SIGQUIT SIGILL SIGABRT SIGTERM SIGSTOP
 trap functrap EXIT
 
+start_time=$(date +%s)
 #Set up the work directory as a copy of the test data directory
 echo "Setting up work directory..."
 cp -r $INPUT_DIR/* $WORK_DIR
 cd $WORK_DIR
-
+echo "Elapsed time for data copy: $(($(date +%s) - start_time)) seconds"
 
 function usage {
     cat << EOF
