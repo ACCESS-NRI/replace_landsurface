@@ -11,4 +11,6 @@ dependencies:
   - xarray
   - versioneer
   - pytest
+  - pytest-cov
+  - pytest-xdist
   - hypothesis
