@@ -128,9 +128,13 @@ def new_shutil_move(original_shutil_move, get_output_path, get_expected_output_p
         (2, "202008090000", "barra"),
         (3, "202112310000", "astart"),
     ],
-    ids=["hres_ic_era5land", "hres_ic_barra", "hres_ic_astart"],
+    ids=[
+        "hres_ic_era5land",
+        "hres_ic_barra",
+        "hres_ic_astart",
+    ],
 )
-def test_hres_ic_era5land(
+def test_hres_ic(
     new_shutil_move,
     get_output_path,
     get_expected_output_path,
@@ -141,7 +145,7 @@ def test_hres_ic_era5land(
     _type,
 ):
     """
-    Test the hres_ic entry point with '--type era5land'
+    Test the hres_ic entry point
     """
     with mock_sys_argv(num, start, _type):
         with patch("shutil.move", side_effect=new_shutil_move(num)):
@@ -153,16 +157,36 @@ def test_hres_ic_era5land(
         num, output, expected_output
     )
 
-
-def test_hres_eccb_era5land():
+@pytest.mark.parametrize(
+    "num, start, _type",
+    [
+        (4, "202305040000", "era5land"),
+        # (5, "202403050000", "barra"),
+    ],
+    ids=[
+        "hres_eccb_era5land", 
+        # "hres_eccb_barra",
+    ],
+)
+def test_hres_eccb(
+    new_shutil_move,
+    get_output_path,
+    get_expected_output_path,
+    get_error_msg,
+    mock_sys_argv,
+    num,
+    start,
+    _type,
+):
     """
-    Test the hres_eccb entry point with '--type era5land'
+    Test the hres_eccb entry point
     """
-    pass
-
-
-def test_hres_eccb_barra():
-    """
-    Test the hres_eccb entry point with '--type barra'
-    """
-    pass
+    with mock_sys_argv(num, start, _type):
+        with patch("shutil.move", side_effect=new_shutil_move(num)):
+            hres_ic.main()
+    output = get_output_path(num)
+    expected_output = get_expected_output_path(num)
+    # # Compare the output file with the expected output
+    assert filecmp.cmp(output, expected_output), get_error_msg(
+        num, output, expected_output
+    )
