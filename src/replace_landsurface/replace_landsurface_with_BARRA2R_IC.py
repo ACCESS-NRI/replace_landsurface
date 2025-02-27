@@ -152,6 +152,7 @@ def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
         sys.exit(1)
 
     d.close()
+
     return data.data
 
 
@@ -201,6 +202,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     indir = os.path.join(BARRA_DIR, '1hr',BARRA_FIELDN, 'latest')
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
+
     # Work out the grid bounds using the surface temperature file
     bounds = bounding_box(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
 

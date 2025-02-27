@@ -215,6 +215,10 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
         The file is replaced with a version of itself holding the higher-resolution data.
     """
 
+
+    # create name of file to be replaced
+    ic_file = ic_file_fullpath.parts[-1].replace('.tmp', '')
+   
     # create date/time useful information
     #print(ic_date)
     yyyy = ic_date[0:4]
