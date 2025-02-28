@@ -60,6 +60,10 @@ def get_test_args(num, start, _type):
     ]
 
 
+def get_error_msg(num, output, expected_output):
+    return f"Test {num}: Test output '{output}' does not match the expected output '{expected_output}'!"
+
+
 @pytest.fixture
 def mock_sys_argv():
     @contextlib.contextmanager
@@ -68,14 +72,6 @@ def mock_sys_argv():
             yield mock_sys_argv
 
     return _mock_sys_argv
-
-
-@pytest.fixture()
-def get_error_msg():
-    def _get_error_msg(num, output, expected_output):
-        return f"Test {num}: Test output '{output}' does not match the expected output '{expected_output}'!"
-
-    return _get_error_msg
 
 
 @pytest.fixture(scope="module")
@@ -132,7 +128,6 @@ def test_hres_ic(
     new_shutil_move,
     get_output_path,
     get_expected_output_path,
-    get_error_msg,
     mock_sys_argv,
     num,
     start,
@@ -166,7 +161,6 @@ def test_hres_eccb(
     new_shutil_move,
     get_output_path,
     get_expected_output_path,
-    get_error_msg,
     mock_sys_argv,
     num,
     start,
