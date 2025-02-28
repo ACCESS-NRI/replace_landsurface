@@ -98,13 +98,6 @@ def get_expected_output_path():
 
     return _get_expected_output_path
 
-
-# Set the ROSE_DATA environment variable to the driving data directory in all tests
-@pytest.fixture(autouse=True)
-def mock_rose_data(monkeypatch):
-    monkeypatch.setenv("ROSE_DATA", DRIVING_DATA_DIR)
-
-
 @pytest.fixture(scope="module")
 def original_shutil_move():
     return shutil.move
