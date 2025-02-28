@@ -6,8 +6,7 @@
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
 """
-Replace the land/surface fields in the astart file with higher-resolution
-era5-land or BARRA2-R data (if requested).
+Replace the land-surface fields in the astart file with higher-resolution data
 """
 
 import argparse
@@ -25,16 +24,17 @@ from replace_landsurface import (
 def main():
 
     """
-    The main function that creates a worker pool and generates single GRIB files 
-    for requested date/times in parallel.
+    Calls the command line argument parser and process the arguments using the right function.
 
     Parameters
     ----------
-    None.  The arguments are given via the command-line
+    None
+    The arguments are given via the command-line
 
     Returns
     -------
-    None.  The astart file is updated and overwritten
+    None
+    An output file is written
     """ 
 
     # Parse the command-line arguments
