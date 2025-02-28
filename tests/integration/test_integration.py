@@ -114,45 +114,16 @@ def new_shutil_move(original_shutil_move, get_output_path):
         (1, "202202260000", "era5land"),
         (2, "202008090000", "barra"),
         (3, "202112310000", "astart"),
+        (4, "202305040000", "era5land"),
     ],
     ids=[
         "replace_landsurface_era5land",
         "replace_landsurface_barra",
         "replace_landsurface_astart",
+        "replace_landsurface_era5land_2",
     ],
 )
 def test_replace_landsurface(
-    new_shutil_move,
-    get_output_path,
-    get_expected_output_path,
-    mock_sys_argv,
-    num,
-    start,
-    _type,
-):
-    """
-    Test the replace_landsurface entry point
-    """
-    with mock_sys_argv(num, start, _type):
-        with patch("shutil.move", side_effect=new_shutil_move(num)):
-            replace_landsurface.main()
-    output = get_output_path(num)
-    expected_output = get_expected_output_path(num)
-    # Compare the output file with the expected output
-    assert filecmp.cmp(output, expected_output), get_error_msg(
-        num, output, expected_output
-    )
-
-@pytest.mark.parametrize(
-    "num, start, _type",
-    [
-        (4, "202305040000", "era5land"),
-    ],
-    ids=[
-        "replace_landsurface_era5land_2", 
-    ],
-)
-def test_replace_landsurface_2(
     new_shutil_move,
     get_output_path,
     get_expected_output_path,
