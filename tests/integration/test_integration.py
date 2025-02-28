@@ -100,7 +100,7 @@ def original_shutil_move():
 
 
 @pytest.fixture()
-def new_shutil_move(original_shutil_move, get_output_path, get_expected_output_path):
+def new_shutil_move(original_shutil_move, get_output_path):
     def _new_shutil_move(num):
         def _wrapper(src, dst, **kwargs):
             output_path = get_output_path(num)
