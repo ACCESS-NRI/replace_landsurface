@@ -29,7 +29,7 @@ OUTPUT_DIR = os.path.join(TEST_DATA_DIR, "expected_outputs")
 DRIVING_DATA_DIR = os.path.join(TEST_DATA_DIR, "driving_data")
 # Set the ROSE_DATA environment variable to the driving data directory
 os.environ["ROSE_DATA"] = str(DRIVING_DATA_DIR)
-from replace_landsurface import hres_ic  # importing here because we need to set the ROSE_DATA env variable before importing # noqa
+from replace_landsurface import hres_ic, hres_eccb  # importing here because we need to set the ROSE_DATA env variable before importing # noqa
 
 
 ############################################
@@ -168,7 +168,7 @@ def test_hres_eccb(
     """
     with mock_sys_argv(num, start, _type):
         with patch("shutil.move", side_effect=new_shutil_move(num)):
-            hres_ic.main()
+            hres_eccb.main()
     output = get_output_path(num)
     expected_output = get_expected_output_path(num)
     # Compare the output file with the expected output
