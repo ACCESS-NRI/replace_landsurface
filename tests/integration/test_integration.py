@@ -4,7 +4,6 @@ import os
 import shutil
 import socket
 from unittest.mock import patch
-from pathlib import Path
 import pytest
 
 # If not on Gadi, skip the tests because the test data is not available
@@ -24,15 +23,13 @@ pytestmark = [skip_marker, warning_marker]
 ############################################
 ## === Integration tests setup === ##
 ############################################
-TEST_DATA_DIR = Path("/g/data/vk83/testing/data/replace_landsurface/integration_tests")
-INPUT_DIR = TEST_DATA_DIR / "input_data"
-OUTPUT_DIR = TEST_DATA_DIR / "expected_outputs"
-DRIVING_DATA_DIR = TEST_DATA_DIR / "driving_data"
+TEST_DATA_DIR = "/g/data/vk83/testing/data/replace_landsurface/integration_tests"
+INPUT_DIR = os.path.join(TEST_DATA_DIR, "input_data")
+OUTPUT_DIR = os.path.join(TEST_DATA_DIR, "expected_outputs")
+DRIVING_DATA_DIR = os.path.join(TEST_DATA_DIR, "driving_data")
 # Set the ROSE_DATA environment variable to the driving data directory
 os.environ["ROSE_DATA"] = str(DRIVING_DATA_DIR)
-from replace_landsurface import (
-    hres_ic,
-)  # importing here because we need to set the ROSE_DATA env variable before importing # noqa
+from replace_landsurface import hres_ic  # importing here because we need to set the ROSE_DATA env variable before importing # noqa
 
 
 ############################################
