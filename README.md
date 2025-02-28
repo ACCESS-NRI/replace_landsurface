@@ -30,10 +30,19 @@ pip install --no-deps --no-build-isolation -e .
 
 ### Running the tests
 
-#### Integration tests
-To manually run the integration tests, from the `replace_landsurface` directory, you can:
+The test suite currently includes only integration tests.
+
+To manually run the tests, from the `replace_landsurface` directory, you can:
+
 1. Activate your [micromamba/conda testing environment](#create-a-micromamba-conda-testing-environment)
 2. Run the following command:
    ```
-   bash integration/integration_tests.sh
+   pytest -n 4
    ```
+
+> [!TIP]
+> The `-n 4` option is a [pytest-xdist](https://pytest-xdist.readthedocs.io/en/stable/) option to run the tests in parallel across 4 different workers.
+
+> [!IMPORTANT]
+> Integration tests are designed to be run on `Gadi`.
+> If you run tests on a local machine, the integration tests will be skipped.
