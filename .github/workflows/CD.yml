@@ -4,6 +4,8 @@ on:
   push:
     tags:        
       - '**' 
+env:
+    PACKAGE_FORMAT: .tar.bz2
 
 jobs:
   get-package-name:
@@ -29,7 +31,6 @@ jobs:
     needs: get-package-name
     env:
       BUILD_FOLDER: ${{github.workspace}}/build
-      PACKAGE_PATH: ${{github.workspace}}/build/noarch/*.tar.bz2
     permissions:
       contents: write
     steps:
@@ -38,7 +39,12 @@ jobs:
         with:
             fetch-tags: true
             fetch-depth: 0 
-
+      
+      - name: Set package path
+        id: set-package-path
+        run: |
+          echo "package-path=${{github.workspace}}/build/noarch/*${{env.PACKAGE_FORMAT}}" >> $GITHUB_OUTPUT
+      
       - name: Setup conda build environment
         uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3.0.4
         with:
@@ -52,12 +58,12 @@ jobs:
       - name: Build conda package
         shell: bash -el {0}
         run: |
-          conda build . --no-anaconda-upload --output-folder=${{env.BUILD_FOLDER}} -c accessnri -c conda-forge -c coecms
+          conda build . --no-anaconda-upload --output-folder=${{env.BUILD_FOLDER}} -c accessnri -c conda-forge -c coecms --package-format ${{env.PACKAGE_FORMAT}}
       
       - name: Upload conda package to Anaconda.org
         shell: bash -el {0}
         run: |
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --user ${{ secrets.ANACONDA_USER_NAME }} ${{env.PACKAGE_PATH}}
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload --user ${{ secrets.ANACONDA_USER_NAME }} ${{steps.set-package-path.outputs.package-path}}
       
       - name: Create Release
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 #v2.0.8
@@ -67,7 +73,7 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            ${{env.PACKAGE_PATH}}
+            ${{steps.set-package-path.outputs.package-path}}
 
   # Dispatch the access-ram-condaenv repo (within the same GitHub organization) to update the conda environment 
   # and deploy the new conda environment
