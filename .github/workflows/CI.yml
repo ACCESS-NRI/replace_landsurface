@@ -6,6 +6,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+env:
+    PACKAGE_FORMAT: .tar.bz2
 
 jobs:
   changes:
@@ -35,8 +37,15 @@ jobs:
     needs: changes
     # Only run if there are changes in the tracked files
     if: ${{ needs.changes.outputs.tracked-files == 'true' }}
+    env:
+      BUILD_FOLDER: ${{github.workspace}}/build
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set package path
+        id: set-package-path
+        run: |
+          echo "package-path=${{env.BUILD_FOLDER}}/noarch/*${{env.PACKAGE_FORMAT}}" >> $GITHUB_OUTPUT
 
       - name: Setup conda build environment
         uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3.0.4
@@ -59,11 +68,11 @@ jobs:
 
       - name: Build conda package
         shell: bash -el {0}
-        run: conda build . --no-anaconda-upload --output-folder=./build -c accessnri -c conda-forge -c coecms
+        run: conda build . --no-anaconda-upload --output-folder=${{env.BUILD_FOLDER}} -c accessnri -c conda-forge -c coecms --package-format ${{env.PACKAGE_FORMAT}}
 
       - name: Verify conda package
         shell: bash -el {0}
-        run: conda-verify ./build/noarch/*.tar.bz2 --ignore C1105,C1115,C1141
+        run: conda-verify ${{steps.set-package-path.outputs.package-path}} --ignore C1105,C1115,C1141
         # C1105: invalid version number for 'replace_landsurface' 
         # (there is no git tag in this test so versioneer outputs a 
         # version that conda-verify recognizes as 'invalid')
@@ -75,7 +84,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          path: ./build/noarch/*.tar.bz2
+          path: ${{steps.set-package-path.outputs.package-path}}
 
   # Dispatch the access-ram-condaenv repo (within the same GitHub organization) to deploy the development conda environment
   dispatch-access-ram-condaenv:
