@@ -3,9 +3,7 @@ name: CD
 on:
   push:
     tags:        
-      - '**' 
-env:
-    PACKAGE_FORMAT: .tar.bz2
+      - '**'
 
 jobs:
   get-package-name:
@@ -43,7 +41,7 @@ jobs:
       - name: Set package path
         id: set-package-path
         run: |
-          echo "package-path=${{env.BUILD_FOLDER}}/noarch/*${{env.PACKAGE_FORMAT}}" >> $GITHUB_OUTPUT
+          echo "package-path=${{env.BUILD_FOLDER}}/noarch/*${{vars.PACKAGE_FORMAT}}" >> $GITHUB_OUTPUT
       
       - name: Setup conda build environment
         uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3.0.4
@@ -58,7 +56,7 @@ jobs:
       - name: Build conda package
         shell: bash -el {0}
         run: |
-          conda build . --no-anaconda-upload --output-folder=${{env.BUILD_FOLDER}} -c accessnri -c conda-forge -c coecms --package-format ${{env.PACKAGE_FORMAT}}
+          conda build . --no-anaconda-upload --output-folder=${{env.BUILD_FOLDER}} -c accessnri -c conda-forge -c coecms --package-format ${{vars.PACKAGE_FORMAT}}
       
       - name: Upload conda package to Anaconda.org
         shell: bash -el {0}
