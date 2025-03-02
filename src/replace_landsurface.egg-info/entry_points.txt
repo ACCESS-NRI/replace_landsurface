@@ -1,2 +1,0 @@
-[console_scripts]
-replace_landsurface = replace_landsurface.replace_landsurface:main
