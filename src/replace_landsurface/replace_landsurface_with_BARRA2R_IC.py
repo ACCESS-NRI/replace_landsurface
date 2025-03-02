@@ -6,118 +6,81 @@
 # Created by: Chermelle Engel <Chermelle.Engel@anu.edu.au>
 
 import os
-import sys
+import warnings
 from glob import glob
 from pathlib import Path
+from collections import namedtuple
 
-import iris
 import mule
 import numpy as np
 import xarray as xr
 
+DECIMAL_PRECISION = 4
+STASH_LAND_MASK = 30
 ROSE_DATA = os.environ.get('ROSE_DATA', "")
 # Base directory of the ERA5-land archive on NCI
 BARRA_DIR = os.path.join(ROSE_DATA, 'etc', 'barra_r2')
 
+BoundingBox = namedtuple('BoundingBox', ('latmin', 'latmax', 'lonmin', 'lonmax'))
 
 class ReplaceOperator(mule.DataOperator):
     """ Mule operator for replacing the data"""
     def __init__(self):
         pass
     def new_field(self, sources):
-        #print('new_field')
         return sources[0]
     def transform(self, sources, result):
-        #print('transform')
         return sources[1]
 
 
-class bounding_box(): 
-    """ Container class to hold spatial extent information."""
-    def __init__(self, ncfname, maskfname, var):
-        """
-        Initialization function for bounding_box class
+def get_bounding_box(mule_file): 
+    """ Get spatial extent information for the replacement.
+    
+    Parameters
+    ----------
+    mule_file : mule.UMFile object
+        Input UM fields file
 
-        Parameters
-        ----------
-        ncfname : POSIX string
-            POSIX path to input data (from the NetCDF archive)
-        maskfname : POSIX string
-            POSIX path to mask information to define the data to be cut out
-        var : string
-            The name of the mask variable that defines the spatial extent
+    Returns
+    -------
+    namedtuple
+    The BoundingBox namedtuple
+    """
+    # Get extent from the land mask (stash 30) if present, otherwise use the first field
+    # because the file extent sometimes is not correct
+    try:
+        field = [f for f in mule_file.fields if f.lbuser4 == STASH_LAND_MASK][0]
+    except IndexError:
+        field = mule_file.fields[0]
+    # Get the latitude extent
+    dlat = field.bdy
+    nlat = mule_file.integer_constants.num_rows
+    latmin = round(field.bzy + dlat, DECIMAL_PRECISION) # rounded to avoid numerical inaccuracy
+    latmax = round(latmin + (nlat-1)*dlat, DECIMAL_PRECISION) # rounded to avoid numerical inaccuracy
+    
+    # Get the latitude extent
+    dlon = field.bdx
+    nlon = mule_file.integer_constants.num_cols
+    lonmin = round(field.bzx + dlon, DECIMAL_PRECISION) # rounded to avoid numerical inaccuracy
+    lonmax = round(lonmin + (nlon-1)*dlon, DECIMAL_PRECISION) # rounded to avoid numerical inaccuracy
 
-        Returns
-        -------
-        None.  The variables describing the spatial extent are definied within bounding box object.
-
-        """
-        # Read in the mask and get the minimum/maximum latitude and longitude information
-        if Path(maskfname).exists():
-            d = iris.load(maskfname, var)
-            d = d[0]
-            d = xr.DataArray.from_iris(d)
-
-            lons = d['longitude'].data
-            lonmin = np.min(lons)
-            lonmax = np.max(lons)
-            lats = d['latitude'].data
-            latmin = np.min(lats)
-            latmax = np.max(lats)
-            d.close()
-        else:
-            print(f'ERROR: File {maskfname} not found', file=sys.stderr)
-            raise
-
-        # Read in the file from the high-res netcdf archive
-        if Path(ncfname).exists():
-            d = xr.open_dataset(ncfname)
-        else:
-            print(f'ERROR: File {ncfname} not found', file=sys.stderr)
-            sys.exit(1)
+    return BoundingBox(latmin, latmax, lonmin, lonmax)
 
 
-        # Get the longitude information
-        lons = d['lon'].data
-
-        # Coping with numerical inaccuracy
-        adj = (lons[1] - lons[0])/2.
-
-        # Work out which longitudes define the minimum/maximum extents of the grid of interest
-        lonmin_index = np.argwhere( (lons > lonmin - adj) & (lons < lonmin + adj))[0][0]
-        lonmax_index = np.argwhere( (lons > lonmax - adj) & (lons < lonmax + adj))[0][0]
-
-        # Get the latitude information
-        lats = d['lat'].data
-
-        # Work out which longitudes define the minimum/maximum extents of the grid of interest
-        # use the same adjustment as for longitude
-        latmin_index = np.argwhere( (lats > latmin - adj) & (lats < latmin + adj))[0][0]
-        latmax_index = np.argwhere( (lats > latmax - adj) & (lats < latmax + adj))[0][0]
-
-        # Set the boundaries
-        self.lonmin = lonmin_index
-        self.lonmax = lonmax_index
-        self.latmin = latmin_index
-        self.latmax = latmax_index
-
-
-def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
+def get_barra_data(fname, FIELDN, date, bounds):
     """
     Function to get the BARA2-R data for a single land/surface variable.
 
     Parameters
     ----------
-    ncfname : string
-        The name of the file to read
+    fname : string
+        The name of the high-res file to read
     FIELDN : string
         The name of the variable in the file to read
-    wanted_dt : string
-        The date-time required in "%Y%m%d%H%M" format
-    NLAYERS : int
-        The number of layers in the multi-resolution grid (1 or more)
-    bounds : bounding_box object
-        A bounding box object defining the spatial extent to keep
+    date : string
+        The date in the format "YYYYmmddHHMM".
+    bounds : tuple
+        Tuple containing the spatial extent for the data in the form (latmin, latmax, lonmin, lonmax).
 
     Returns
     -------
@@ -126,73 +89,71 @@ def get_BARRA_nc_data(ncfname, FIELDN, wanted_dt, NLAYERS, bounds):
     """
 
     # Open the file containing the data
-    if Path(ncfname).exists():
-        d = xr.open_dataset(ncfname)
+    if Path(fname).exists():
+        d = xr.open_dataset(fname)
     else:
-        print(f'ERROR: File {ncfname} not found', file=sys.stderr)
-        sys.exit(1)
-    
-    # Find the array index for the date/time of interest
-    times = d['time'].dt.strftime("%Y%m%d%H%M").data
-    TM = times.tolist().index(wanted_dt)
+        raise FileNotFoundError(f"File '{fname}' not found.")
 
-    # retrieve the spatial extends of interest
-    lonmin_index, lonmax_index = bounds.lonmin, bounds.lonmax
-    latmin_index, latmax_index = bounds.latmin, bounds.latmax
-
-    # Read the data
+    # Get the data
+    # Select the variable
     try:
-        if NLAYERS>1:
-          data = d[FIELDN][TM, :, latmin_index:latmax_index+1, lonmin_index:lonmax_index+1]
-        else:
-          data = d[FIELDN][TM, latmin_index:latmax_index+1, lonmin_index:lonmax_index+1]
+        data = d[FIELDN]
     except KeyError:
-        print(fname)
-        print(f'ERROR: Variable temp not found in file', file=sys.stderr)
-        sys.exit(1)
-
-    d.close()
-
+        raise ValueError(f"Variable '{FIELDN}' not found in high-resolution file '{fname}'.")
+    # Select the date
+    try:
+        data = data.sel(time=date)
+    except KeyError:
+        # If the exact date is not found select the nearest date and send a warning message
+        data = data.sel(time=date, method='nearest')
+        actual_date = data.time.values.astype('datetime64[m]').tolist().strftime('%Y%m%d%H%M')
+        warnings.warn(
+            f"The date '{date}' was not found in the high-resolution file '{fname}'.\n"
+            f"Using the nearest date '{actual_date}' instead."
+        )
+    # Select the spatial extent
+    data = data.sel(
+        lat=slice(bounds.latmin, bounds.latmax),
+        lon=slice(bounds.lonmin, bounds.lonmax),
+    )
+    
     return data.data
 
 
-def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
+def swap_land_barra(ec_cb_file_fullpath, date):
     """
     Function to get the BARRA2-R data for all land/surface variables.
 
     Parameters
     ----------
-    mask_fullpath : Path
-        Path to the mask defining the spatial extent
     ic_file_fullpath : string
         Path to file with the coarser resolution data to be replaced with ".tmp" appended at end
-    ic_date : string
-        The date-time required in "%Y%m%d%H%M" format
+    date : string
+        The date in the format "YYYYmmddHHMM".
 
     Returns
     -------
     None.
         The file is replaced with a version of itself holding the higher-resolution data.
     """
-
-
-    # create name of file to be replaced
-    ec_cb_file = ec_cb_file_fullpath.parts[-1].replace('.tmp', '')
    
     # create date/time useful information
-    yyyy = ic_date[0:4]
-    mm = ic_date[4:6]
-    ic_z_date = ic_date.replace('T', '').replace('Z', '')
+    yyyy = date[0:4]
+    mm = date[4:6]
     
     # Path to input file
     ff_in = ec_cb_file_fullpath.as_posix().replace('.tmp', '')
-
     # Path to output file
     ff_out = ec_cb_file_fullpath.as_posix()
-    #print(ff_in, ff_out)
     
     # Read input file
     mf_in = mule.load_umfile(ff_in)
+    
+    # Set up the output file
+    mf_out = mf_in.copy()
+    
+    # Get spatial extent for the replacement
+    bounds = get_bounding_box(mf_in)
     
     # Create Mule Replacement Operator
     replace = ReplaceOperator() 
@@ -203,11 +164,9 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
 
-    # Work out the grid bounds using the surface temperature file
-    bounds = bounding_box(barra_fname, mask_fullpath.as_posix(), "land_binary_mask")
 
     # Read in the surface temperature data (and keep to use for replacement)
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_z_date ,-1 ,bounds)
+    data = get_barra_data(barra_fname, BARRA_FIELDN, date, bounds)
     surface_temp = data.copy()
     
     # Read in the soil moisture data (and keep to use for replacement)
@@ -215,7 +174,7 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     indir = os.path.join(BARRA_DIR, '3hr',BARRA_FIELDN, 'latest')
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
+    data = get_barra_data(barra_fname, BARRA_FIELDN, date, bounds)
     mrsol = data.copy()
 
     # Read in the soil temperature data (and keep to use for replacement)
@@ -223,16 +182,12 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     indir = os.path.join(BARRA_DIR, '3hr',BARRA_FIELDN, 'latest')
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
-    data = get_BARRA_nc_data(barra_fname, BARRA_FIELDN, ic_date.replace('T', '').replace('Z', ''), 4, bounds)
+    data = get_barra_data(barra_fname, BARRA_FIELDN, date, bounds)
     tsl = data.copy()
     
-    # Set up the output file
-    mf_out = mf_in.copy()
 
     # For each field in the input write to the output file (but modify as required)
     for f in mf_in.fields:
-    
-      #print(f.lbuser4, f.lblev, f.lblrec, f.lbhr, f.lbcode)
       if f.lbuser4 == 9:
         # replace coarse soil moisture with high-res information
         current_data = f.get_data()

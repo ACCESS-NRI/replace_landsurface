@@ -26,8 +26,7 @@ dependencies = [
 Repository = "https://github.com/ACCESS-NRI/replace_landsurface"
 
 [project.scripts]
-hres_eccb = "replace_landsurface.hres_eccb:main"
-hres_ic = "replace_landsurface.hres_ic:main"
+replace_landsurface = "replace_landsurface.replace_landsurface:main"
 
 [build-system]
 build-backend = "setuptools.build_meta"
