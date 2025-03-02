@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+src/replace_landsurface/__init__.py
+src/replace_landsurface/_version.py
+src/replace_landsurface/replace_landsurface.py
+src/replace_landsurface/replace_landsurface_with_BARRA2R_IC.py
+src/replace_landsurface/replace_landsurface_with_ERA5land_IC.py
+src/replace_landsurface/replace_landsurface_with_FF_IC.py
+src/replace_landsurface.egg-info/PKG-INFO
+src/replace_landsurface.egg-info/SOURCES.txt
+src/replace_landsurface.egg-info/dependency_links.txt
+src/replace_landsurface.egg-info/entry_points.txt
+src/replace_landsurface.egg-info/requires.txt
+src/replace_landsurface.egg-info/top_level.txt

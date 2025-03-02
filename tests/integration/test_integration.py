@@ -46,8 +46,6 @@ def get_test_args(num, start, _type):
         "script_name",
         "--file",
         os.path.join(INPUT_DIR, test_dir, "file" + ".tmp"),
-        "--mask",
-        os.path.join(INPUT_DIR, test_dir, "mask"),
         "--start",
         start,
         "--type",
