@@ -29,7 +29,7 @@ OUTPUT_DIR = os.path.join(TEST_DATA_DIR, "expected_outputs")
 DRIVING_DATA_DIR = os.path.join(TEST_DATA_DIR, "driving_data")
 # Set the ROSE_DATA environment variable to the driving data directory
 os.environ["ROSE_DATA"] = str(DRIVING_DATA_DIR)
-from replace_landsurface import hres_ic, hres_eccb  # importing here because we need to set the ROSE_DATA env variable before importing # noqa
+from replace_landsurface import replace_landsurface  # importing here because we need to set the ROSE_DATA env variable before importing # noqa
 
 
 ############################################
@@ -37,23 +37,23 @@ from replace_landsurface import hres_ic, hres_eccb  # importing here because we 
 ############################################
 def get_test_args(num, start, _type):
     test_dir = f"test_{num}"
-    _hres_ic = (
+    hres_ic = (
         os.path.join(INPUT_DIR, test_dir, "hres_ic")
         if _type == "astart"
         else "NOT_USED"
     )
     return [
         "script_name",
-        "--mask",
-        os.path.join(INPUT_DIR, test_dir, "mask"),
         "--file",
         os.path.join(INPUT_DIR, test_dir, "file" + ".tmp"),
+        "--mask",
+        os.path.join(INPUT_DIR, test_dir, "mask"),
         "--start",
         start,
         "--type",
         _type,
         "--hres_ic",
-        _hres_ic,
+        hres_ic,
     ]
 
 
@@ -114,47 +114,16 @@ def new_shutil_move(original_shutil_move, get_output_path):
         (1, "202202260000", "era5land"),
         (2, "202008090000", "barra"),
         (3, "202112310000", "astart"),
-    ],
-    ids=[
-        "hres_ic_era5land",
-        "hres_ic_barra",
-        "hres_ic_astart",
-    ],
-)
-def test_hres_ic(
-    new_shutil_move,
-    get_output_path,
-    get_expected_output_path,
-    mock_sys_argv,
-    num,
-    start,
-    _type,
-):
-    """
-    Test the hres_ic entry point
-    """
-    with mock_sys_argv(num, start, _type):
-        with patch("shutil.move", side_effect=new_shutil_move(num)):
-            hres_ic.main()
-    output = get_output_path(num)
-    expected_output = get_expected_output_path(num)
-    # Compare the output file with the expected output
-    assert filecmp.cmp(output, expected_output), get_error_msg(
-        num, output, expected_output
-    )
-
-@pytest.mark.parametrize(
-    "num, start, _type",
-    [
         (4, "202305040000", "era5land"),
-        # (5, "202403050000", "barra"),
     ],
     ids=[
-        "hres_eccb_era5land", 
-        # "hres_eccb_barra",
+        "replace_landsurface_era5land",
+        "replace_landsurface_barra",
+        "replace_landsurface_astart",
+        "replace_landsurface_era5land_2",
     ],
 )
-def test_hres_eccb(
+def test_replace_landsurface(
     new_shutil_move,
     get_output_path,
     get_expected_output_path,
@@ -164,11 +133,11 @@ def test_hres_eccb(
     _type,
 ):
     """
-    Test the hres_eccb entry point
+    Test the replace_landsurface entry point
     """
     with mock_sys_argv(num, start, _type):
         with patch("shutil.move", side_effect=new_shutil_move(num)):
-            hres_eccb.main()
+            replace_landsurface.main()
     output = get_output_path(num)
     expected_output = get_expected_output_path(num)
     # Compare the output file with the expected output
