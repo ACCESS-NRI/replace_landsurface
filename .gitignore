@@ -1,6 +1,5 @@
 test_data/
 .coverage
-*.sh
 __pycache__/
 *.py[cod]
 .ruff_cache/

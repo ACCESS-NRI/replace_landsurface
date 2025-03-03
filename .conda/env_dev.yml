@@ -1,0 +1,16 @@
+channels:
+  - accessnri
+  - conda-forge
+  - coecms
+  - nodefaults
+
+dependencies:
+  - mule
+  - numpy <= 1.23.4 # https://stackoverflow.com/a/75148219/21024780
+  - scitools-iris
+  - xarray
+  - versioneer
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - hypothesis
