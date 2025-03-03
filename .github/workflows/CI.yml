@@ -133,16 +133,16 @@ jobs:
       - name: Copy repo to ${{ matrix.deployment-site }}
         run: |
           rsync -r -v -e 'ssh -i ${{ steps.ssh.outputs.private-key-path }}' --exclude={'.git','*_cache'} \
-            ${{ github.workspace }}/${{ github.event.repository.name }} \
+            ${{ github.workspace }} \
             ${{ secrets.USER }}@${{ secrets.HOST_DATA }}:${{ steps.create-tmp-dir.outputs.tmp_dir }}
-          echo "Repository at ${{github.ref}} copied to ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
+          echo "Repository at ${{ github.sha }} copied to ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
 
       - name: Run tests on ${{ matrix.deployment-site }}
         run: |
           ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} /bin/bash <<'EOT'
           # Create micromamba environment
           env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
-          env_prefix=${{ steps.create-tmp-dir.outputs.tmp_dir }}/environment_${{github.ref}}
+          env_prefix=${{ steps.create-tmp-dir.outputs.tmp_dir }}/environment_${{github.sha}}
           echo "Creating environment using '$env_file'"
           ${{ vars.MICROMAMBA_EXE }} create --prefix $env_prefix --file $env_file --yes
           # Install package as development
