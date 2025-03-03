@@ -96,7 +96,7 @@ jobs:
       - name: Get sites
         id: get-deployment-sites
         run: |
-            sites=$(jq --compact-output '.sites' ./github/config/deployment-sites.json)
+            sites=$(jq --compact-output '.sites' ./.github/config/deployment-sites.json)
             echo "Found the following deployment sites: $sites"
             echo "deployment-sites=$sites" >> $GITHUB_OUTPUT
   
