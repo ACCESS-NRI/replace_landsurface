@@ -201,6 +201,8 @@ def swap_land_barra(mask_fullpath, ec_cb_file_fullpath, ic_date):
     BARRA_FIELDN = 'ts'
     indir = os.path.join(BARRA_DIR, '1hr',BARRA_FIELDN, 'latest')
     barra_files = glob(os.path.join(indir, BARRA_FIELDN + '*' + yyyy + mm + '*nc'))
+    print(f"{BARRA_DIR=}")
+    print(f"{barra_files=}")
     barra_fname = indir + '/' + barra_files[0].split('/')[-1]
 
     # Work out the grid bounds using the surface temperature file

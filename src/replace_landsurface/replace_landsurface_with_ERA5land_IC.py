@@ -230,6 +230,8 @@ def swap_land_era5land(mask_fullpath, ic_file_fullpath, ic_date):
     ERA_FIELDN = 'swvl1'
     land_yes = os.path.join(ERA_DIR, ERA_FIELDN, yyyy)
     era_files = glob(os.path.join(land_yes, ERA_FIELDN + '*' + yyyy + mm + '*nc'))
+    print(f"{ERA_DIR=}")
+    print(f"{era_files=}")
     era5_fname = os.path.join(land_yes, os.path.basename(era_files[0]))
     generic_era5_fname = era5_fname.replace('swvl1', 'FIELDN')
 
