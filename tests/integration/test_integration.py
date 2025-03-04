@@ -28,7 +28,7 @@ INPUT_DIR = os.path.join(TEST_DATA_DIR, "input_data")
 OUTPUT_DIR = os.path.join(TEST_DATA_DIR, "expected_outputs")
 DRIVING_DATA_DIR = os.path.join(TEST_DATA_DIR, "driving_data")
 # Set the ROSE_DATA environment variable to the driving data directory
-os.environ["ROSE_DATA"] = str(DRIVING_DATA_DIR)
+os.environ["ROSE_DATA"] = DRIVING_DATA_DIR
 from replace_landsurface import hres_ic, hres_eccb  # importing here because we need to set the ROSE_DATA env variable before importing # noqa
 
 

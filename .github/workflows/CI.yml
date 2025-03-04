@@ -128,6 +128,7 @@ jobs:
         id: create-tmp-dir
         run: |
           tmp_dir=$(ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} 'mktemp -d')
+          echo "Created temporary directory: $tmp_dir"
           echo "tmp_dir=$tmp_dir" >> $GITHUB_OUTPUT
       
       - name: Copy repo to ${{ matrix.deployment-site }}
@@ -140,22 +141,31 @@ jobs:
       - name: Run tests on ${{ matrix.deployment-site }}
         run: |
           ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} /bin/bash <<'EOT'
+          chmod -R g+r,g+x ${{ steps.create-tmp-dir.outputs.tmp_dir }}
           # Create micromamba environment
           env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
           env_prefix=${{ steps.create-tmp-dir.outputs.tmp_dir }}/environment_${{github.sha}}
-          echo "Creating environment using '$env_file'"
+          echo "Creating micromamba environment"
+          echo "  Micromamba executable: ${{ vars.MICROMAMBA_EXE }}"
+          echo "  Environment file: $env_file"
           ${{ vars.MICROMAMBA_EXE }} create --prefix $env_prefix --file $env_file --yes
           # Install package as development
+          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pip install --no-deps --no-build-isolation ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
           echo "Installing '${{ github.event.repository.name }}'"
-          ${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pip install --no-deps --no-build-isolation ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}
+          echo "  Command: $cmd"
+          eval "$cmd"
           # Run tests (using 4 workers in parallel)
-          ${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pytest -n 4 ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}
+          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pytest -n 4 ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
+          echo "Running tests"
+          echo "  Command: $cmd"
+          eval "$cmd"
           if [[ $? != 0 ]]; then
             echo "Tests failed"
             exit 1
           fi
           echo "All tests passed. Cleaning up conda environment and temporary directory..."
           # Remove micromamba environment
+          echo "Cleaning up environment and tmp directory"
           ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes
           # Remove temporary directory
           rm -rf ${{ steps.create-tmp-dir.outputs.tmp_dir }}
