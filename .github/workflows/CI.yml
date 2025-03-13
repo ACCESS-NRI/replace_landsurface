@@ -139,6 +139,7 @@ jobs:
           echo "Repository at ${{ github.sha }} copied to ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
 
       - name: Run tests on ${{ matrix.deployment-site }}
+        shell: bash -e {0}
         run: |
           ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} /bin/bash <<'EOT'
           chmod -R g+r,g+x ${{ steps.create-tmp-dir.outputs.tmp_dir }}
@@ -168,7 +169,7 @@ jobs:
           echo "Cleaning up environment and tmp directory"
           ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes
           # Remove temporary directory
-          rm -rf ${{ steps.create-tmp-dir.outputs.tmp_dir }}
+          rm -rf '${{ steps.create-tmp-dir.outputs.tmp_dir }}'
           EOT
 
   # Dispatch the access-ram-condaenv repo (within the same GitHub organization) to deploy the development conda environment
