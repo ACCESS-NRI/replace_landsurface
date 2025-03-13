@@ -139,9 +139,9 @@ jobs:
           echo "Repository at ${{ github.sha }} copied to ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
 
       - name: Run tests on ${{ matrix.deployment-site }}
-        shell: bash -e {0}
         run: |
           ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} /bin/bash <<'EOT'
+          set -e
           chmod -R g+r,g+x ${{ steps.create-tmp-dir.outputs.tmp_dir }}
           # Create micromamba environment
           env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
