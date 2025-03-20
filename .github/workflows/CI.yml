@@ -147,9 +147,9 @@ jobs:
           env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
           cleanup() {
             # Remove micromamba environment whenever the script exits
-                ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes &> /dev/null
-                rm -rf '${{ steps.create-tmp-dir.outputs.tmp_dir }}'
-                echo "Micromamba environment and temporary directory removed."
+            ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes &> /dev/null
+            rm -rf '${{ steps.create-tmp-dir.outputs.tmp_dir }}'
+            echo "Micromamba environment and temporary directory removed."
           }
           trap cleanup EXIT
           # Create micromamba environment
