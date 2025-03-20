@@ -174,7 +174,7 @@ jobs:
   dispatch-access-ram-condaenv:
     name: Dispatch the ${{ github.repository_owner }}/access-ram-condaenv repo
     runs-on: ubuntu-latest
-    if : ${{ github.event_name == 'pull_request' }}
+    if : ${{ always() && github.event_name == 'pull_request' && needs.verify-conda-build.result != 'failure' }}
     needs: [verify-conda-build, testing]
     steps:
     - name: Dispatch repo
