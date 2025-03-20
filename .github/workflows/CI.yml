@@ -143,9 +143,20 @@ jobs:
           ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} /bin/bash <<'EOT'
           set -e
           chmod -R g+r,g+x ${{ steps.create-tmp-dir.outputs.tmp_dir }}
-          # Create micromamba environment
-          env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
           env_prefix=${{ steps.create-tmp-dir.outputs.tmp_dir }}/environment_${{github.sha}}
+          env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
+          cleanup() {
+            exit_status=$?
+            # Remove micromamba environment and temporary directory if the scripts fails, 
+            # but retain them if the tests fail (exit_status == 101)
+            if [[ "$exit_status" -ne 0 && "$exit_status" -ne 101 ]]; then
+                ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes &> /dev/null
+                rm -rf '${{ steps.create-tmp-dir.outputs.tmp_dir }}'
+                echo "Micromamba environment and temporary directory removed."
+            fi
+          }
+          trap cleanup EXIT
+          # Create micromamba environment
           echo "Creating micromamba environment"
           echo "  Micromamba executable: ${{ vars.MICROMAMBA_EXE }}"
           echo "  Environment file: $env_file"
@@ -160,16 +171,12 @@ jobs:
           echo "Running tests"
           echo "  Command: $cmd"
           eval "$cmd"
+          set +e
           if [[ $? != 0 ]]; then
-            echo "Tests failed"
-            exit 1
+            echo "Tests failed!"
+            exit 101 # Setting exit code to 101 to prevent cleanup from deleting the folder/environment
           fi
-          echo "All tests passed. Cleaning up conda environment and temporary directory..."
-          # Remove micromamba environment
-          echo "Cleaning up environment and tmp directory"
-          ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes
-          # Remove temporary directory
-          rm -rf '${{ steps.create-tmp-dir.outputs.tmp_dir }}'
+          echo "All tests passed!"
           EOT
 
   # Dispatch the access-ram-condaenv repo (within the same GitHub organization) to deploy the development conda environment
