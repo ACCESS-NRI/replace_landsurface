@@ -83,13 +83,99 @@ jobs:
         with:
           if-no-files-found: error
           path: ${{steps.set-package-path.outputs.package-path}}
+  
+  get-deployment-sites:
+    name: Get Deployment Sites
+    runs-on: ubuntu-latest
+    outputs:
+      deployment-sites: ${{ steps.get-deployment-sites.outputs.deployment-sites }}
+    steps:
+      - name: Checkout config
+        uses: actions/checkout@v4
+
+      - name: Get sites
+        id: get-deployment-sites
+        run: |
+            sites=$(jq --compact-output '.sites' ./.github/config/deployment-sites.json)
+            echo "Found the following deployment sites: $sites"
+            echo "deployment-sites=$sites" >> $GITHUB_OUTPUT
+  
+  testing:
+    name: Run tests
+    runs-on: ubuntu-latest
+    needs: get-deployment-sites
+    strategy:
+      fail-fast: false
+      matrix:
+        deployment-site: ${{ fromJson(needs.get-deployment-sites.outputs.deployment-sites) }}
+    environment: ${{ matrix.deployment-site }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: access-nri/actions/.github/actions/setup-ssh@main
+        id: ssh
+        with:
+          hosts: |
+            ${{ secrets.HOST_DATA }}
+            ${{ secrets.HOST }}
+          private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Create tmp directory
+        id: create-tmp-dir
+        run: |
+          tmp_dir=$(ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} 'mktemp -d')
+          echo "Created temporary directory: $tmp_dir"
+          echo "tmp_dir=$tmp_dir" >> $GITHUB_OUTPUT
+      
+      - name: Copy repo to ${{ matrix.deployment-site }}
+        run: |
+          rsync -r -v -e 'ssh -i ${{ steps.ssh.outputs.private-key-path }}' --exclude={'.git','*_cache'} \
+            ${{ github.workspace }} \
+            ${{ secrets.USER }}@${{ secrets.HOST_DATA }}:${{ steps.create-tmp-dir.outputs.tmp_dir }}
+          echo "Repository at ${{ github.sha }} copied to ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
+
+      - name: Run tests on ${{ matrix.deployment-site }}
+        run: |
+          ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} /bin/bash <<'EOT'
+          set -e
+          chmod -R g+r,g+x ${{ steps.create-tmp-dir.outputs.tmp_dir }}
+          env_prefix=${{ steps.create-tmp-dir.outputs.tmp_dir }}/environment_${{github.sha}}
+          env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
+          cleanup() {
+            # Remove micromamba environment whenever the script exits
+            ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes &> /dev/null
+            rm -rf '${{ steps.create-tmp-dir.outputs.tmp_dir }}'
+            echo "Micromamba environment and temporary directory removed."
+          }
+          trap cleanup EXIT
+          # Create micromamba environment
+          echo "Creating micromamba environment"
+          echo "  Micromamba executable: ${{ vars.MICROMAMBA_EXE }}"
+          echo "  Environment file: $env_file"
+          ${{ vars.MICROMAMBA_EXE }} create --prefix $env_prefix --file $env_file --yes
+          # Install package as development
+          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pip install --no-deps --no-build-isolation ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
+          echo "Installing '${{ github.event.repository.name }}'"
+          echo "  Command: $cmd"
+          eval "$cmd"
+          # Run tests (using 4 workers in parallel)
+          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pytest -n 4 ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
+          echo "Running tests"
+          echo "  Command: $cmd"
+          eval "$cmd"
+          echo "All tests passed!"
+          EOT
 
   # Dispatch the access-ram-condaenv repo (within the same GitHub organization) to deploy the development conda environment
   dispatch-access-ram-condaenv:
     name: Dispatch the ${{ github.repository_owner }}/access-ram-condaenv repo
     runs-on: ubuntu-latest
-    if : ${{ github.event_name == 'pull_request' }}
-    needs: verify-conda-build
+    if : ${{ always() && github.event_name == 'pull_request' && needs.verify-conda-build.result != 'failure' }}
+    needs: [verify-conda-build, testing]
     steps:
     - name: Dispatch repo
       uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0

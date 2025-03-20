@@ -46,3 +46,4 @@ To manually run the tests, from the `replace_landsurface` directory, you can:
 > [!IMPORTANT]
 > Integration tests are designed to be run on `Gadi`.
 > If you run tests on a local machine, the integration tests will be skipped.
+> To run the integration tests, membership of the `zz93` and `ob53` NCI projects is required.
