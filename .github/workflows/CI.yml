@@ -160,7 +160,7 @@ jobs:
           echo "  Environment file: $env_file"
           ${{ vars.MICROMAMBA_EXE }} create --prefix $env_prefix --file $env_file --yes
           # Install package as development
-          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pip install --no-deps --no-build-isolation ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
+          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pip install --no-deps --no-build-isolation ${tmp_dir}/${{ github.event.repository.name }}"
           echo "Installing '${{ github.event.repository.name }}'"
           echo "  Command: $cmd"
           eval "$cmd"
