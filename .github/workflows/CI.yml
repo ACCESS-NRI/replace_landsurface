@@ -142,13 +142,15 @@ jobs:
         run: |
           ssh ${{ secrets.USER }}@${{ secrets.HOST }} -i ${{ steps.ssh.outputs.private-key-path }} /bin/bash <<'EOT'
           set -e
-          chmod -R g+r,g+x ${{ steps.create-tmp-dir.outputs.tmp_dir }}
-          env_prefix=${{ steps.create-tmp-dir.outputs.tmp_dir }}/environment_${{github.sha}}
-          env_file=${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}/.conda/env_dev.yml
+          tmp_dir='${{ steps.create-tmp-dir.outputs.tmp_dir }}'
+          chmod -R g+r,g+x "$tmp_dir"
+          export MAMBA_ROOT_PREFIX="$tmp_dir"
+          env_prefix=${tmp_dir}/environment_${{github.sha}}
+          env_file=${tmp_dir}/${{ github.event.repository.name }}/.conda/env_dev.yml
           cleanup() {
             # Remove micromamba environment whenever the script exits
             ${{ vars.MICROMAMBA_EXE }} env remove --prefix $env_prefix --yes &> /dev/null
-            rm -rf '${{ steps.create-tmp-dir.outputs.tmp_dir }}'
+            rm -rf "$tmp_dir"
             echo "Micromamba environment and temporary directory removed."
           }
           trap cleanup EXIT
@@ -163,7 +165,7 @@ jobs:
           echo "  Command: $cmd"
           eval "$cmd"
           # Run tests (using 4 workers in parallel)
-          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pytest -n 4 ${{ steps.create-tmp-dir.outputs.tmp_dir }}/${{ github.event.repository.name }}"
+          cmd="${{ vars.MICROMAMBA_EXE }} run --prefix $env_prefix pytest -n 4 ${tmp_dir}/${{ github.event.repository.name }}"
           echo "Running tests"
           echo "  Command: $cmd"
           eval "$cmd"
